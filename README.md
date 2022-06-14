@@ -1,10 +1,10 @@
-# Spatial Tools
+# Pregmal Python Tools
 
 > Author: **Arnau Pujol**  
-> Year: **2020**  
+> Year: **2022**  
 > Version: **1.0**  
 
-This repository contains tools for statistical analyses.
+This repository contains tools for statistical analyses for the PregMal project.
 
 Software requirements:
 ----------------------
@@ -12,6 +12,9 @@ All the packages that are required so that all the codes can run are:
 - numpy
 - scipy
 - pandas
+- matplotlib
+- contextily
+- geopandas
 
 Installation:
 ----------------------

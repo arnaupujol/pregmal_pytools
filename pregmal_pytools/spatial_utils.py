@@ -41,8 +41,8 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
                       pop1name = 'MiPMon', pop2name = 'children 2-10', \
                       pos1name = r'$P.\ falciparum$ infection (detected by PCR)', \
                        pos2name = r'$P.\ falciparum$ infection (detected by PCR)', \
-                      extra_title = "", xlims = None, ylims = None): 
-    
+                      extra_title = "", xlims = None, ylims = None):
+
     print("Number of FOFs in " + pop1name+ ":", len(fof_catalogue_mip))
     mask_mip = (fof_catalogue_mip['positives']>=min_size_fof)&\
                 (fof_catalogue_mip['mean_pr']>=min_pr_fof)&\
@@ -50,7 +50,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     print("Number of FOFs in " + pop1name+ " with >=", str(min_size_fof), "positives and PR>=" + \
           str(min_pr_fof) + " and p-value <= " +str(max_p_fof) + " :", \
           np.sum(mask_mip))
-    
+
     print("Number of FOFs in " + pop2name+ ":", len(fof_catalogue_c210))
     mask_c210 = (fof_catalogue_c210['positives']>=min_size_fof)&\
                 (fof_catalogue_c210['mean_pr']>=min_pr_fof)&\
@@ -58,7 +58,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     print("Number of FOFs in " + pop2name+ " with >=", str(min_size_fof), "positives and PR>=" +\
           str(min_pr_fof) + " and p-value <= " +str(max_p_fof) + " :", \
           np.sum(mask_c210))
-    
+
     #Mapping FOFs
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
@@ -87,7 +87,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
     mipmon[mip_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = 'All study ' + pop1name)
     id_mask = np.array([f in unique_fofids for f in fofid_mip], dtype = bool)#change to kept ids
-    
+
     mipmon[mip_positive&mip_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_mip[id_mask], \
                                                        markersize = 15, alpha = 1, \
                                                        label = pos1name, \
@@ -122,14 +122,14 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     if ylims is not None:
         plt.ylim(ylims[0], ylims[1])
     plt.show()
-    
+
     plot_fof_hists(fof_catalogue_mip, fof_catalogue_c210, pop1name = pop1name, \
                   pop2name = pop2name, fof_mip_mask = mask_mip, fof_c210_mask = mask_c210)
-    
+
 def plot_fof_hists(fof_catalogue_mip, fof_catalogue_c210, \
                    pop1name = 'MiPMon', pop2name = 'children', \
                    fof_mip_mask = None, fof_c210_mask = None):
-    if fof_mip_mask is None: 
+    if fof_mip_mask is None:
         fof_cat_mip_plot = fof_catalogue_mip
     else:
         fof_cat_mip_plot = fof_catalogue_mip[fof_mip_mask]
@@ -137,7 +137,7 @@ def plot_fof_hists(fof_catalogue_mip, fof_catalogue_c210, \
         fof_cat_c210_plot = fof_catalogue_c210
     else:
         fof_cat_c210_plot = fof_catalogue_c210[fof_c210_mask]
-    
+
     ranges = get_ranges(fof_cat_mip_plot['positives'], fof_cat_c210_plot['positives'])
     plt.hist(fof_cat_mip_plot['positives'], 20, range = ranges, \
              alpha = .5, label = pop1name)
@@ -148,7 +148,7 @@ def plot_fof_hists(fof_catalogue_mip, fof_catalogue_c210, \
     plt.ylabel("Number of FOF found")
     plt.legend()
     plt.show()
-    
+
     ranges = get_ranges(fof_cat_mip_plot['total'], fof_cat_c210_plot['total'])
     plt.hist(fof_cat_mip_plot['total'], 20, range = ranges, \
              alpha = .5, label = pop1name)
@@ -159,7 +159,7 @@ def plot_fof_hists(fof_catalogue_mip, fof_catalogue_c210, \
     plt.ylabel("Number of FOF found")
     plt.legend()
     plt.show()
-    
+
     ranges = get_ranges(fof_cat_mip_plot['p'], fof_cat_c210_plot['p'])
     plt.hist(fof_cat_mip_plot['p'], 40, range = ranges, \
              alpha = .5, label = pop1name)
@@ -170,7 +170,7 @@ def plot_fof_hists(fof_catalogue_mip, fof_catalogue_c210, \
     plt.ylabel("Number of FOF found")
     plt.legend()
     plt.show()
-    
+
 def get_ranges(var1, var2):
     mins = min([var1.min(), \
                 var2.min()])
@@ -183,7 +183,7 @@ def get_fof_data(scale, mipmon_positions, mipmon_test, cross210_positions, cross
     #Running FOF for MiPMon and building its database
     fofid_mip, mean_pr_fof_mip, pval_fof_mip, fof_catalogue_mip = fof.get_fof_PR(mipmon_positions, mipmon_test, scale, fofid = None)
     #TODO get N (nrands) random fof catalogues from shuffled mipmon_test
-    
+
     #Running FOF for cross-sectionals and building its database
     fofid_c210, mean_pr_fof_c210, pval_fof_c210, fof_catalogue_c210 = fof.get_fof_PR(cross210_positions, cross210_test, scale, fofid = None)
     #TODO get N (nrands) random fof catalogues from shuffled cross210_test
@@ -273,17 +273,17 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
     cross210['pospcr'][cross210['pospcr'] == 'Positive'] = 1.
     cross210['rdt'][cross210['rdt'] == 'Negative'] = 0.
     cross210['rdt'][cross210['rdt'] == 'Positive'] = 1.
-    
+
     mipmon['pcrpos'][mipmon['pcrpos'] == 'PCR-'] = 0
     mipmon['pcrpos'][mipmon['pcrpos'] == 'PCR+'] = 1
     #Fixing one crazy value
     cross['lat'][cross['lat']>0] = -cross['lat'][cross['lat']>0]
-    
+
     if serology_filename is not None:
         serology = pd.read_csv(serology_filename)
         #Merging serological data with MiPMon data
         mipmon = pd.merge(mipmon, serology, on = 'nida', how = 'inner')
-        
+
         #Defining antigens and their values
         antigens = []
         for a in general_sero:
@@ -292,7 +292,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
         for a in pregnancy_sero:
             if 'FMM_' + a in mipmon.columns and a not in excluded_antigens:
                 antigens.append(a)
-        
+
         #Defining binary quantities of cutoff. Intermediates are considered negative for the moment
         for cutoff in ['FMM_', 'NC_']:
             for a in antigens:
@@ -325,23 +325,23 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
             antigens.append('pregnancy_pos')
         if 'All peptides' not in excluded_antigens:
             antigens.append('All peptides')
-    
+
         return mipmon, cross, cross210, antigens
     else:
         return mipmon, cross, cross210
-    
+
 def get_label_list(df_list, label = 'tempID'):
     """
     This method gives the unique values of a column in a list
     of data frames.
-    
+
     Parameters:
     -----------
     df_list: list of pandas.DataFrames
         List of dataframes
     label: str
         Name of column to select
-    
+
     Returns:
     --------
     label_list: list
@@ -383,7 +383,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
         #select data
         selected_data = (index['date'] >= min_date + pd.to_timedelta(time_steps*step_num, unit = 'D'))& \
                         (index['date'] <= min_date + pd.to_timedelta(time_steps*step_num + time_width, unit = 'D'))
-    
+
         #get hotspots
         positions = np.array((index[selected_data]['x'], index[selected_data]['y'])).T
         if test_result is None:
@@ -400,20 +400,20 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             #fofid = fof.get_fofid(positions, scale, min_num)
             fofid, mean_pr_fof, pval_fof, fof_catalogue = fof.get_fof_PR(positions, test_result_selected, scale, \
                                                                min_neighbours = min_num)
-        
+
         fof_catalogue = fof_catalogue[fof_catalogue['p'] <= max_p_lifetimes]#Removing non-significant hotspots TODO test
         hotspot = fofid
         for i, h in enumerate(hotspot):#Removing non-significant hotspots from fofid of positives TODO test
             if h not in fof_catalogue['id'].unique():
                 hotspot[i] = 0
-        
+
         #Plotting maps
         xrange = [index['x'].min()-1000, index['x'].max()+1000]
         yrange = [index['y'].min()-1000, index['y'].max()+1000]
         positives = test_result_selected == 1
         negatives = test_result_selected == 0
         df_to_plot = index[selected_data]
-        if save or show_maps: 
+        if save or show_maps:
             ax = df_to_plot.plot(markersize = 0, figsize = [8,8], alpha = 0)
             if np.sum(negatives) > 0:
                 df_to_plot[negatives].plot(ax = ax, color = 'tab:green', markersize = 15, figsize = [8,8], alpha = .5, label = 'Negative case')
@@ -449,7 +449,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 plt.show()
             else:
                 plt.close()
-        
+
         #Save quantities
         hist2d_hotspots += np.histogram2d(positions[:,0][positives][hotspot > 0], \
                                           positions[:,1][positives][hotspot > 0], \
@@ -457,7 +457,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
         mean_date.append(min_date + pd.to_timedelta(time_steps*(step_num + .5), unit = 'D'))
         fof_catalogue['Date'] = mean_date[-1]
         fof_catalogues.append(fof_catalogue)
-        
+
         num_cases_in_hot.append(np.sum(hotspot>0))
         fraction_cases_in_hot.append(num_cases_in_hot[-1]/len(hotspot))
         hot_num.append(len(np.unique(fofid[fofid>0])))
@@ -465,18 +465,18 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             mean_hot_size.append(np.nan)
         else:
             mean_hot_size.append(num_cases_in_hot[-1]/hot_num[-1])
-        
+
         step_num +=1
-    
+
     fof_catalogues_lowp = [fcat[fcat['p'] <= max_p_lifetimes] for fcat in fof_catalogues]
     fof_catalogues_lowp = fof.get_temp_id(fof_catalogues_lowp, linking_time, linking_dist)
-    #translating time_steps to days in lifetime. 
+    #translating time_steps to days in lifetime.
     #TODO: get the dates in the fof_catalogues and use them for linking hotspots
     for t in range(len(fof_catalogues)):
         fof_catalogues_lowp[t]['lifetime'] *= time_steps
-    
+
     mean_date = pd.to_datetime(mean_date)
-    
+
     #TODO make plots below for fof_catalogues_lowp
     #Plotting hotspot statistics over time
     plt.figure(figsize = [8,8])
@@ -494,42 +494,42 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
-    
+
     plt.plot(mean_date, mean_hot_size, marker = 'o')
     plt.title('Mean hotspot size')
     plt.ylabel('Mean hotspot size')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
-    
+
     plt.plot(mean_date, num_cases_in_hot)
     plt.title('Number of cases in hotspots')
     plt.ylabel('Number of cases in hotspots')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
-    
+
     plt.plot(mean_date, fraction_cases_in_hot)
     plt.title('Fraction of cases in hotspots')
     plt.ylabel('Fraction of cases in hotspots')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
-    
+
     plot_label(fof_catalogues_lowp, xrange, yrange, label2plot, xlims = xlims, ylims = ylims)
-    
+
     hist_timelifes(fof_catalogues_lowp)
-    
+
     lifetime_timeline(fof_catalogues_lowp, mean_date, time_steps, kernel_size = kernel_size)
-    
+
     if save:
         #Generating GIF of maps
         gif_output_name = output_path + method + '_tw' + str(time_width) + '_ts' + str(time_steps) + '_min' + str(min_num) + '_scale' + str(scale)  + name_end + '.gif'
         os.system('convert -delay ' + str(gif_delay) + ' -loop 0 ' + output_path + save_file_names + '*png ' +gif_output_name)
         print("GIF saved in", gif_output_name)
-    
+
     return mean_date, hot_num, num_cases_in_hot, mean_hot_size, fraction_cases_in_hot, \
-            fof_catalogues, fof_catalogues_lowp
+            fof_catalogues_lowp
 
 def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vmax = None, \
               xlims = None, ylims = None):
@@ -553,13 +553,13 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
     if ylims is not None:
         plt.ylim(ylims[0], ylims[1])
     plt.show()
-    
+
 def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1):
     tempids = fof.get_label_list(fof_cat, label = 'tempID')
     lifetimes = fof.get_label_list(fof_cat, label = 'lifetime')
     print(lifetimes)
     print("Maximum limelife:", max(lifetimes))
-    
+
     for i, tempid in enumerate(tempids):
         num_cases = []
         dates = []
@@ -574,7 +574,7 @@ def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1):
                 num_cases.append(0)
         dates = pd.to_datetime(dates)
         num_cases = np.array(num_cases)
-        
+
         num_cases_convolved = estimations.convolve_ones(num_cases, kernel_size)
         plt.plot(mean_date_test, num_cases_convolved, color = cm.turbo(lifetime/max(lifetimes)), \
                 lw = 2)
@@ -585,19 +585,19 @@ def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1):
     cNorm = colors.Normalize(vmin=0, vmax=max(lifetimes))
     plt.colorbar(cm.ScalarMappable(norm = cNorm, cmap='turbo'), label = 'Lifetime')
     plt.show()
-    
-    
+
+
 def fof_cut(fofid, min_num):
     """
     This method remove the FOF ids with less than a given
-    number of cases. 
-    
+    number of cases.
+
     Parameters:
     fofid: np.array
         List of IDs of the FOFs, with 0 meaning no FOF
     min_num: int
         Minimum number of cases in FOFs to be kept
-    
+
     Returns:
     fofid: np.array
         Final list of FOF IDs
@@ -628,9 +628,9 @@ def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
 def generate_mock_data(population_size, positivity_rate, positive_distribution, \
                        seed = None, save = True, output_file = 'mock_dataframe.csv'):
     """
-    This method generates mock data of a spatial distribution 
+    This method generates mock data of a spatial distribution
     of negative and positive cases.
-    
+
     Parameters:
     -----------
     population_size: int
@@ -645,7 +645,7 @@ def generate_mock_data(population_size, positivity_rate, positive_distribution, 
         If true, the dataframe is saved as a csv
     output_file: str
         Name of output file
-    
+
     Returns:
     --------
     x_rand: np.array
@@ -697,8 +697,8 @@ def generate_mock_data(population_size, positivity_rate, positive_distribution, 
 def get_mock_dataframe(x_rand, y_rand, test_rand, save = True, output_file = 'mock_dataframe.csv'):
     """
     This method creates a dataframe of the mock data.
-    
-    Parameters: 
+
+    Parameters:
     -----------
     x_rand: np.array
         Positions in x-axis
@@ -710,8 +710,8 @@ def get_mock_dataframe(x_rand, y_rand, test_rand, save = True, output_file = 'mo
         If true, the dataframe is saved as a csv
     output_file: str
         Name of output file
-        
-    Returns: 
+
+    Returns:
     --------
     mock_df: pd.DataFrame
         Dataframe of the mock data
@@ -720,19 +720,19 @@ def get_mock_dataframe(x_rand, y_rand, test_rand, save = True, output_file = 'mo
     {
         'id' : np.arange(len(x_rand), dtype = int),
         'x' : x_rand,
-        'y' : y_rand, 
-        'test' : test_rand, 
+        'y' : y_rand,
+        'test' : test_rand,
         'case_count' : np.ones_like(x_rand),
         'dates' : pd.to_datetime(['2017-02-02' for i in range(len(x_rand))])
     })
     mock_df = geopandas.GeoDataFrame(mock_df, geometry = geopandas.points_from_xy(mock_df['x'], mock_df['y']))
-    if save: 
+    if save:
         mock_df.to_csv(output_file)
     return mock_df
 
 def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalogue, \
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
-                         excluded_plots = []): 
+                         excluded_plots = []):
     if 'id' in show_plots and 'id' not in excluded_plots:
         plt.scatter(x_data, y_data, c = 'tab:grey')
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
@@ -740,7 +740,7 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
         plt.colorbar()
         plt.title("ID of hotspots")
         plt.show()
-    
+
     if 'pr' in show_plots and 'pr' not in excluded_plots:
         plt.scatter(x_data, y_data, c = 'tab:grey')
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
@@ -748,7 +748,7 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
         plt.colorbar()
         plt.title("PR of hotspots")
         plt.show()
-    
+
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
         plt.scatter(x_data, y_data, c = 'tab:grey')
         p_vals = np.array([fof_catalogue[fof_catalogue['id'] == i]['p'] for i in id_data[id_data > 0]], \
@@ -758,7 +758,7 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
         plt.colorbar()
         plt.title("P-value of hotspots")
         plt.show()
-    
+
     if 'p-hist' in show_plots and 'p-hist' not in excluded_plots:
         size_thresholds = [3,4,5]
         colors = [cm.inferno((i+1)/(len(size_thresholds)+1)) for i in range(len(size_thresholds))]
@@ -796,8 +796,8 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
         plt.ylabel("False positive fraction")
         plt.legend()
         plt.show()
-        
-        
+
+
 def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_data, \
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
                          excluded_plots = []):
@@ -809,7 +809,7 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
         plt.colorbar()
         plt.title("ID of hotspots")
         plt.show()
-    
+
     if 'pr' in show_plots and 'pr' not in excluded_plots:
         plt.scatter(x_data, y_data, c = 'tab:grey')
         mask = points_data['gis.LOC_OBS'] == 1
@@ -818,7 +818,7 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
         plt.colorbar()
         plt.title("PR of hotspots")
         plt.show()
-    
+
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
         plt.scatter(x_data, y_data, c = 'tab:grey')
         mask = points_data['gis.LOC_OBS'] == 1
@@ -827,7 +827,7 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
         plt.colorbar()
         plt.title("P-value of hotspots")
         plt.show()
-    
+
     if 'p-hist' in show_plots and 'p-hist' not in excluded_plots:
         size_thresholds = [3,4,5]
         colors = [cm.inferno((i+1)/(len(size_thresholds)+1)) for i in range(len(size_thresholds))]
@@ -842,7 +842,7 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
         plt.xlabel("P-value")
         plt.legend()
         plt.show()
-        
+
     if 'ncases-hist' in show_plots and 'ncases-hist' not in excluded_plots:
         hist_all, edges, patches = plt.hist(clusters_data['col.POPULATION'], 20, \
                                             range = [np.min(clusters_data['col.POPULATION']), \
@@ -865,7 +865,7 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
         plt.ylabel("False positive fraction")
         plt.legend()
         plt.show()
-        
+
 def get_study_year(mipmon):
     year_1 = ['2016-11-01', '2017-10-31']
     year_2 = ['2017-11-01', '2018-10-31']
