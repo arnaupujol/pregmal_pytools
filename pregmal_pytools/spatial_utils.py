@@ -417,7 +417,12 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             ax = df_to_plot.plot(markersize = 0, figsize = [8,8], alpha = 0)
             if np.sum(negatives) > 0:
                 df_to_plot[negatives].plot(ax = ax, color = 'tab:green', markersize = 15, figsize = [8,8], alpha = .5, label = 'Negative case')
-            df_to_plot[positives].plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside hotspot')
+            if np.sum(positives) == 0:#To keep the legend of cases in hotspots even when there are no cases
+                mockdf = pd.DataFrame({'lng' : [.0], 'lat' : [.0]})
+                mockdf = geopandas.GeoDataFrame(mockdf, geometry = geopandas.points_from_xy(mockdf['lng'], mockdf['lat']))
+                mockdf.plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside hotspot')
+            else:
+                df_to_plot[positives].plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside hotspot')
             if np.sum(hotspot > 0) == 0:#To keep the legend of cases in hotspots even when there are no cases
                 mockdf = pd.DataFrame({'lng' : [.0], 'lat' : [.0]})
                 mockdf = geopandas.GeoDataFrame(mockdf, geometry = geopandas.points_from_xy(mockdf['lng'], mockdf['lat']))
@@ -516,7 +521,9 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
 
-    plot_label(fof_catalogues_lowp, xrange, yrange, label2plot, xlims = xlims, ylims = ylims)
+    labels2plot = fof.get_label_list(fof_catalogues_lowp, label = label2plot)
+    plot_label(fof_catalogues_lowp, xrange, yrange, label2plot, xlims = xlims, \
+                ylims = ylims, vmin = min(labels2plot), vmax = max(labels2plot))
 
     hist_timelifes(fof_catalogues_lowp)
 
