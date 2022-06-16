@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 import contextily as ctx
 from spatial_tools import fof
+from epifriends import epifriends
 import os
 from stat_tools import estimations
 
@@ -189,6 +190,16 @@ def get_fof_data(scale, mipmon_positions, mipmon_test, cross210_positions, cross
     #TODO get N (nrands) random fof catalogues from shuffled cross210_test
     return fofid_mip, mean_pr_fof_mip, pval_fof_mip, fof_catalogue_mip, fofid_c210, mean_pr_fof_c210, pval_fof_c210, fof_catalogue_c210 #TODO return random_fofs is computed
 
+def get_epifriends_data(scale, mipmon_positions, mipmon_test, cross210_positions, cross210_test):#TODO add get_rands, nrands
+    #Running EpiFRIenDs for MiPMon and building its database
+    epi_id_mip, mean_pr_epi_mip, pval_epi_mip, epi_catalogue_mip = epifriends.catalogue(mipmon_positions, mipmon_test, scale, cluster_id = None)
+    #TODO get N (nrands) random EpiFRIenDs catalogues from shuffled mipmon_test
+
+    #Running EpiFRIenDs for cross-sectionals and building its database
+    epi_id_c210, mean_pr_epi_c210, pval_epi_c210, epi_catalogue_c210 = epifriends.catalogue(cross210_positions, cross210_test, scale, cluster_id = None)
+    #TODO get N (nrands) random EpiFRIenDs catalogues from shuffled cross210_test
+    return epi_id_mip, mean_pr_epi_mip, pval_epi_mip, epi_catalogue_mip, epi_id_c210, mean_pr_epi_c210, pval_epi_c210, epi_catalogue_c210 #TODO return random_epis is computed
+
 def get_time_masks(cross_df, mipmon_df, year, time_width = None, verbose = False):
     #Mask to select the year of the data
     cross_mask = cross_df['year'] == year
@@ -359,7 +370,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                           linking_dist, test_result = None, show_maps = True, gif_delay = 30, method = 'fof', \
                          output_path = '/tmp/', save = True, bins2d = 50, label2plot = 'lifetime', \
                          kernel_size = 1, max_p_lifetimes = 1, name_end = '', plot_date = 'month', \
-                         xlims = None, ylims = None):
+                         xlims = None, ylims = None, version = 'fof'):
     #temporal loop
     min_date = index['date'].min()
     max_date = index['date'].max()
@@ -392,14 +403,25 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             test_result_selected = np.array(test_result[selected_data])
         if method == 'fof':
             #fofid = fof.get_fofid(positions, scale)
-            fofid, mean_pr_fof, pval_fof, fof_catalogue = fof.get_fof_PR(positions, test_result_selected, scale)
+            if version == 'fof':
+                fofid, mean_pr_fof, pval_fof, fof_catalogue = fof.get_fof_PR(positions, test_result_selected, scale)
+            elif version == 'epifriends':
+                fofid, mean_pr_fof, pval_fof, fof_catalogue = epifriends.catalogue(positions, test_result_selected, scale)
+            else:
+                print("ERROR: wrong version name")
             #Removing FOFs with less than min_num cases
             fofid = fof_cut(fofid, min_num)
             fof_catalogue = fof_catalogue[fof_catalogue['positives'] >= min_num]
         elif method == 'radial':
             #fofid = fof.get_fofid(positions, scale, min_num)
-            fofid, mean_pr_fof, pval_fof, fof_catalogue = fof.get_fof_PR(positions, test_result_selected, scale, \
+            if version == 'fof':
+                fofid, mean_pr_fof, pval_fof, fof_catalogue = fof.get_fof_PR(positions, test_result_selected, scale, \
                                                                min_neighbours = min_num)
+            elif version == 'epifriends':
+                fofid, mean_pr_fof, pval_fof, fof_catalogue = epifriends.catalogue(positions, test_result_selected, scale, \
+                                                               min_neighbours = min_num)
+            else:
+                print("ERROR: wrong version name")
 
         fof_catalogue = fof_catalogue[fof_catalogue['p'] <= max_p_lifetimes]#Removing non-significant hotspots TODO test
         hotspot = fofid
@@ -474,7 +496,12 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
         step_num +=1
 
     fof_catalogues_lowp = [fcat[fcat['p'] <= max_p_lifetimes] for fcat in fof_catalogues]
-    fof_catalogues_lowp = fof.get_temp_id(fof_catalogues_lowp, linking_time, linking_dist)
+    if version == 'fof':
+        fof_catalogues_lowp = fof.get_temp_id(fof_catalogues_lowp, linking_time, linking_dist)
+    elif version == 'epifriends':
+        fof_catalogues_lowp = epifriends.add_temporal_id(fof_catalogues_lowp, linking_time, linking_dist)
+    else:
+        print("ERROR: wrong version name")
     #translating time_steps to days in lifetime.
     #TODO: get the dates in the fof_catalogues and use them for linking hotspots
     for t in range(len(fof_catalogues)):
@@ -521,13 +548,20 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
 
-    labels2plot = fof.get_label_list(fof_catalogues_lowp, label = label2plot)
+    if version == 'fof':
+        labels2plot = fof.get_label_list(fof_catalogues_lowp, label = label2plot)
+    elif version == 'epifriends':
+        labels2plot = epifriends.get_label_list(fof_catalogues_lowp, label = label2plot)
+    else:
+        print("ERROR: wrong version name")
     plot_label(fof_catalogues_lowp, xrange, yrange, label2plot, xlims = xlims, \
-                ylims = ylims, vmin = min(labels2plot), vmax = max(labels2plot))
+                ylims = ylims, vmin = min(labels2plot), vmax = max(labels2plot), \
+                version = version)
 
-    hist_timelifes(fof_catalogues_lowp)
+    hist_timelifes(fof_catalogues_lowp, version = version)
 
-    lifetime_timeline(fof_catalogues_lowp, mean_date, time_steps, kernel_size = kernel_size)
+    lifetime_timeline(fof_catalogues_lowp, mean_date, time_steps, \
+                        kernel_size = kernel_size, version = version)
 
     if save:
         #Generating GIF of maps
@@ -539,8 +573,13 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             fof_catalogues_lowp
 
 def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vmax = None, \
-              xlims = None, ylims = None):
-    timelifes = fof.get_label_list(fof_cat_list, label = label)
+              xlims = None, ylims = None, version = 'fof'):
+    if version == 'fof':
+        timelifes = fof.get_label_list(fof_cat_list, label = label)
+    elif version == 'epifriends':
+        timelifes = epifriends.get_label_list(fof_cat_list, label = label)
+    else:
+        print("ERROR: wrong version name")
     plot_started = False
     for t in range(len(fof_cat_list)):
         if  len(fof_cat_list[t]) > 0:
@@ -561,9 +600,16 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
         plt.ylim(ylims[0], ylims[1])
     plt.show()
 
-def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1):
-    tempids = fof.get_label_list(fof_cat, label = 'tempID')
-    lifetimes = fof.get_label_list(fof_cat, label = 'lifetime')
+def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
+                        version = 'fof'):
+    if version == 'fof':
+        tempids = fof.get_label_list(fof_cat, label = 'tempID')
+        lifetimes = fof.get_label_list(fof_cat, label = 'lifetime')
+    elif version == 'epifriends':
+        tempids = epifriends.get_label_list(fof_cat, label = 'tempID')
+        lifetimes = epifriends.get_label_list(fof_cat, label = 'lifetime')
+    else:
+        print("ERROR: wrong version name")
     print(lifetimes)
     print("Maximum limelife:", max(lifetimes))
 
@@ -615,8 +661,13 @@ def fof_cut(fofid, min_num):
     return fofid
 
 def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
-                   c = None, range = None):
-    all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
+                   c = None, range = None, version = 'fof'):
+    if version == 'fof':
+        all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
+    elif version == 'epifriends':
+        all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
+    else:
+        print("ERROR: wrong version name")
     if len(all_tempids) > 0:
         lifetimes = []
         for tempid in all_tempids:
