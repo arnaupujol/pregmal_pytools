@@ -322,7 +322,7 @@ def chi2_vs_timeshift(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_mipmon_a
             mean_pcorr_r_sorted = np.sort(np.array(mean_pcorr_r))
             pcorr025_vs_t[s]['Mean'].append(mean_pcorr_r_sorted[int(.025*len(mean_pcorr_r))])#TODO test
             pcorr975_vs_t[s]['Mean'].append(mean_pcorr_r_sorted[int(.975*len(mean_pcorr_r))])#TODO test
-            
+
         for i, mipmon_areas in enumerate(all_mipmon_areas):
             chi2_vs_t[s][mipmon_areas[0]] = np.array(chi2_vs_t[s][mipmon_areas[0]])
             pcorr_vs_t[s][mipmon_areas[0]] = np.array(pcorr_vs_t[s][mipmon_areas[0]])
@@ -335,18 +335,18 @@ def chi2_vs_timeshift(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_mipmon_a
                 plt.figure(1)
                 plt.plot(all_ts, pcorr_vs_t[s][mipmon_areas[0]], label = mipmon_areas[0] + ' ' + s, \
                          c = colors[j], lw = 3, linestyle = lstyles[i])
-                
+
         pcorr_vs_t[s]['All'] = np.array(pcorr_vs_t[s]['All'])
         pcorr025_vs_t[s]['All'] = np.array(pcorr025_vs_t[s]['All'])
         pcorr975_vs_t[s]['All'] = np.array(pcorr975_vs_t[s]['All'])
         pcorr_vs_t[s]['Mean'] = np.array(pcorr_vs_t[s]['Mean'])
         pcorr025_vs_t[s]['Mean'] = np.array(pcorr025_vs_t[s]['Mean'])
         pcorr975_vs_t[s]['Mean'] = np.array(pcorr975_vs_t[s]['Mean'])
-        
+
         chi2_vs_t[s]['Mean'] = (chi2_vs_t[s]['Magude-sede'] + chi2_vs_t[s]['Manhica-Sede'] + chi2_vs_t[s]['Ilha-Josina'])/3.
         chi2_vs_t[s]['Mean'] = estimations.convolve_ones(chi2_vs_t[s]['Mean'], convolve_size)
-        pcorr_vs_t[s]['Mean'] = estimations.convolve_ones(pcorr_vs_t[s]['Mean'], convolve_size)    
-            
+        pcorr_vs_t[s]['Mean'] = estimations.convolve_ones(pcorr_vs_t[s]['Mean'], convolve_size)
+
         chi2_mean[s] = chi2_vs_t[s]['Mean']
         pcorr_mean[s] = pcorr_vs_t[s]['Mean']
         if convolve_size is None:
@@ -379,7 +379,7 @@ def chi2_vs_timeshift(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_mipmon_a
             plt.plot(all_ts, all_chi2_mean, label = 'Total mean', c = 'k', lw = 3, linestyle = '-')
         else:
             plt.plot(all_ts[convolve_size:-convolve_size], all_chi2_mean[convolve_size:-convolve_size], label = 'Total mean', c = 'k', lw = 3, linestyle = '-')
-    
+
     plt.figure(0)
     plt.legend()
     plt.xlabel('Time shift (days)')
@@ -390,7 +390,7 @@ def chi2_vs_timeshift(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_mipmon_a
     plt.ylabel(r'Pearson Correlation Coefficient')
     if show:
         plt.show()
-    if get_CI: 
+    if get_CI:
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts, pcorr_vs_t, pcorr025_vs_t, pcorr975_vs_t
     else:
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts
@@ -580,11 +580,11 @@ def chi2_vs_timeshift_vs_ags(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_m
         pcorr_vs_t[antigen]['Mean'] = np.array(pcorr_vs_t[antigen]['Mean'])
         pcorr025_vs_t[antigen]['Mean'] = np.array(pcorr025_vs_t[antigen]['Mean'])
         pcorr975_vs_t[antigen]['Mean'] = np.array(pcorr975_vs_t[antigen]['Mean'])
-        
+
         chi2_vs_t[antigen]['Mean'] = (chi2_vs_t[antigen]['Magude-sede'] + chi2_vs_t[antigen]['Manhica-Sede'] + chi2_vs_t[antigen]['Ilha-Josina'])/3.
         chi2_vs_t[antigen]['Mean'] = estimations.convolve_ones(chi2_vs_t[antigen]['Mean'], convolve_size)
         pcorr_vs_t[antigen]['Mean'] = estimations.convolve_ones(pcorr_vs_t[antigen]['Mean'], convolve_size)
-        
+
         chi2_mean[antigen] = chi2_vs_t[antigen]['Mean']
         pcorr_mean[antigen] = pcorr_vs_t[antigen]['Mean']
         if convolve_size is None:
@@ -593,13 +593,13 @@ def chi2_vs_timeshift_vs_ags(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_m
         else:
             min_chi2[antigen] = min(chi2_vs_t[antigen]['Mean'][convolve_size:-convolve_size])
             max_pcorr[antigen] = max(pcorr_vs_t[antigen]['Mean'][convolve_size:-convolve_size])
-        
+
         w = np.where(chi2_vs_t[antigen]['Mean'] == min_chi2[antigen])[0][0]
         time_lag_chi2[antigen] = all_ts[w]
         w = np.where(pcorr_vs_t[antigen]['Mean'] == max_pcorr[antigen])[0][0]
         time_lag_pcorr[antigen] = all_ts[w]
         all_chi2_mean += chi2_vs_t[antigen]['Mean']
-        
+
         plt.figure(0)
         if convolve_size is None:
             plt.plot(all_ts, chi2_vs_t[antigen]['Mean'], label = 'Mean ' + antigen, c = colors[j], lw = 3, linestyle = '-')
@@ -614,9 +614,9 @@ def chi2_vs_timeshift_vs_ags(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_m
             plt.plot(all_ts[convolve_size:-convolve_size], \
                      pcorr_vs_t[antigen]['Mean'][convolve_size:-convolve_size], \
                      label = 'Mean ' + antigen, c = colors[j], lw = 3, linestyle = '-')
-    
-    
-    
+
+
+
     if show_all_means:
         all_chi2_mean /= (j+1)
         all_pcorr_mean /= (j+1)
@@ -642,7 +642,7 @@ def chi2_vs_timeshift_vs_ags(mipmon, rrs, opd_5, mipmon_selection, all_ts, all_m
     plt.show()
     if show:
         plt.show()
-    if get_CI: 
+    if get_CI:
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts, pcorr_vs_t, pcorr025_vs_t, pcorr975_vs_t
     else:
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts
@@ -762,7 +762,7 @@ def chi2_vs_timeshift_vs_ags_vs_selection(mipmon, rrs, opd_5, mipmon_selection, 
         min_chi2_test[s], max_pcorr_test[s], time_lag_chi2_test[s], time_lag_pcorr_test[s], \
         chi2_mean_test[s], pcorr_mean_test[s], all_ts_test[s] = {}, {}, {}, {}, {}, {}, {}
         pcorr_vs_t[s], pcorr025_vs_t[s], pcorr975_vs_t[s] = {}, {}, {}
-        
+
         min_chi2_test[s], max_pcorr_test[s], time_lag_chi2_test[s], time_lag_pcorr_test[s], \
         chi2_mean_test[s], pcorr_mean_test[s], all_ts_test[s], \
         pcorr_vs_t[s], pcorr025_vs_t[s], pcorr975_vs_t[s] = chi2_vs_timeshift_vs_ags(mipmon, rrs, opd_5, \
@@ -1056,7 +1056,7 @@ def chi2_vs_timeshift_parasito_vs_ags_vs_selection(mipmon, mipmon_selection_para
     min_chi2_test, max_pcorr_test, time_lag_chi2_test, time_lag_pcorr_test, \
     chi2_mean_test, pcorr_mean_test, all_ts_test, chi2_vs_t, pcorr_vs_t, \
     pcorr025_vs_t, pcorr975_vs_t = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
-    
+
     for s in mipmon_selection_sero:
         print(mipmon_test, s)
         min_chi2_test[s], max_pcorr_test[s], time_lag_chi2_test[s], time_lag_pcorr_test[s], \
@@ -1200,7 +1200,7 @@ def chi2_vs_timeshift_parasito_vs_ags(mipmon, mipmon_selection_para, mipmon_sele
                                                                            get_pcc = True, \
                                                                             mipmon_prev_r = mip_sero_prev_r[mask], \
                                                                             clinic_bins_r = mip_para_prev_r[mask])
-                
+
                 chi2_vs_t[antigen][mipmon_areas[0]].append(chi2)
                 pcorr_vs_t[antigen][mipmon_areas[0]].append(pcorr)
                 #CI of PCC for each area and time
@@ -1252,19 +1252,19 @@ def chi2_vs_timeshift_parasito_vs_ags(mipmon, mipmon_selection_para, mipmon_sele
                 plt.figure(1)
                 plt.plot(all_ts, pcorr_vs_t[antigen][mipmon_areas[0]], label = mipmon_areas[0] + ' ' + antigen, c = colors[j], \
                          lw = 3, linestyle = lstyles[i])
-        
+
         pcorr_vs_t[antigen]['All'] = np.array(pcorr_vs_t[antigen]['All'])
         pcorr025_vs_t[antigen]['All'] = np.array(pcorr025_vs_t[antigen]['All'])
         pcorr975_vs_t[antigen]['All'] = np.array(pcorr975_vs_t[antigen]['All'])
         pcorr_vs_t[antigen]['Mean'] = np.array(pcorr_vs_t[antigen]['Mean'])
         pcorr025_vs_t[antigen]['Mean'] = np.array(pcorr025_vs_t[antigen]['Mean'])
         pcorr975_vs_t[antigen]['Mean'] = np.array(pcorr975_vs_t[antigen]['Mean'])
-        
+
         chi2_vs_t[antigen]['Mean'] = (chi2_vs_t[antigen]['Magude-sede'] + chi2_vs_t[antigen]['Manhica-Sede'] + chi2_vs_t[antigen]['Ilha-Josina'])/3.
         chi2_vs_t[antigen]['Mean'] = estimations.convolve_ones(chi2_vs_t[antigen]['Mean'], convolve_size)
         pcorr_vs_t[antigen]['Mean'] = estimations.convolve_ones(pcorr_vs_t[antigen]['Mean'], convolve_size)
         pcorr_vs_t[antigen]['All'] = estimations.convolve_ones(pcorr_vs_t[antigen]['All'], convolve_size)
-        
+
         chi2_mean[antigen] = chi2_vs_t[antigen]['Mean']
         pcorr_mean[antigen] = pcorr_vs_t[antigen]['Mean']
         if convolve_size is None:
@@ -1322,8 +1322,8 @@ def chi2_vs_timeshift_parasito_vs_ags(mipmon, mipmon_selection_para, mipmon_sele
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts, chi2_vs_t, pcorr_vs_t, pcorr025_vs_t, pcorr975_vs_t
     else:
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts, chi2_vs_t, pcorr_vs_t
-    
-    
+
+
 def chi2_vs_timeshift_parasito_vs_ags_old(mipmon, mipmon_selection_para, mipmon_selection_sero, all_ts, \
                                       all_mipmon_areas, mipmon_bins, mipmon_test, antigens, \
                                       show_all = False, show_all_means = False, cutoff = 'FMM', \
@@ -1442,7 +1442,7 @@ def chi2_vs_timeshift_parasito_vs_ags_old(mipmon, mipmon_selection_para, mipmon_
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts, all_chi2_vs_t, all_pcc_vs_t
     else:
         return min_chi2, max_pcorr, time_lag_chi2, time_lag_pcorr, chi2_mean, pcorr_mean, all_ts
-    
+
 def get_mipmon_pos_bins(mipmon, mipmon_areas, time_bins, time_shift = 0, mipmon_mask = None, \
                         mipmon_test = 'pcr', ret_resamples = False):
     """

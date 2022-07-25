@@ -7,7 +7,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 import scipy.stats as sci_stats
 import scipy.optimize as optimization
-from stat_tools.estimations import smooth 
+from stat_tools.estimations import smooth
 from stat_tools.errors import chi_square
 import pdb
 
@@ -202,11 +202,19 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
         xmax = np.max(all_vals)*1.05
     xplot = np.array([xmin, xmax])
     if show_identity:
-        plt.plot(xplot, xplot, color = 'tab:grey', label = 'Slope = 1')
+        plt.plot(xplot, xplot, color = 'tab:grey', label = 'Identity')
     if show_fit:
-        plt.plot(xplot, p_all[1] + p_all[0]*xplot, lw = 2, color = 'k', linestyle = '--', label = 'Linear fit (all women)')
-    plt.xlabel(r'$Pf\rm{PR}_{\rm{'+cross_test_type.upper()+'}}$ cross-sectional (2-10 years)')
-    plt.ylabel(r'$\rm{PR}_{\rm{'+mip_test_type.upper()+'}}$ pregnant women')
+        plt.plot(xplot, p_all[1] + p_all[0]*xplot, lw = 2, color = 'k', linestyle = '--', label = 'Linear regression')
+    if cross_test_type == 'rdt':
+        testlabel = 'RDT'
+    elif cross_test_type == 'pcr':
+        testlabel = 'qPCR'
+    plt.xlabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ cross-sectional (2-10 years)')
+    if mip_test_type == 'rdt':
+        testlabel = 'RDT'
+    elif mip_test_type == 'pcr':
+        testlabel = 'qPCR'
+    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ pregnant women')
     plt.title(title)
     plt.xlim(xmin, xmax)
     plt.legend()
@@ -921,7 +929,7 @@ def time_comparison_plot(cross210, mipmon, rrs, opd_2to9, cross_areas, mipmon_ar
     plt.xlabel('Date')
     plt.ylabel(ylabel)
     plt.ylim(ylim)
-    if show_plot: 
+    if show_plot:
         plt.show()
 
 
@@ -1079,7 +1087,7 @@ def get_clinic_amplitude_chi2(mipmon_prev, mipmon_err, clinic_bins, clinic_err, 
     clinic_err: np.array
         Error on the mean clinical cases
     get_pcc: bool
-        If True it returns the Pearson correlation coefficient of the 
+        If True it returns the Pearson correlation coefficient of the
         renormalised data
     mipmon_prev_r: np.ndarray
         MiPMon prevalence per time bin for each bootstrap resample
@@ -1299,12 +1307,12 @@ def show_2dstats_parity(dataframe, variable1, variable2, threshold1, threshold2,
     ymax = max([dataframe[i + ' ' + variable2].max() for i in parity_list])
     xlims = [xmin, xmax*1.3]
     ylims = [ymin*.95, ymax*1.05]
-    
+
     if threshold1 is not None:
         plt.vlines(threshold1, ylims[0], ylims[1], color = 'tab:grey')
     if threshold2 is not None:
         plt.hlines(threshold2, xlims[0], xlims[1], color = 'tab:grey')
-    
+
     yshift = 1
     for c, p in enumerate(parity_list):
             plt.annotate(p, xy = [xmax*1.3, ymax*yshift], c = colours[c])
@@ -1314,7 +1322,7 @@ def show_2dstats_parity(dataframe, variable1, variable2, threshold1, threshold2,
     plt.xlabel(variable1)
     plt.ylabel(variable2)
     plt.show()
-    
+
 def show_stats_parity(dataframe, variable, threshold = None):
     plt.scatter(dataframe['All prenatal ' + variable], dataframe.index, color = 'tab:blue', marker = 's', label = 'All prenatal')
     plt.scatter(dataframe['Primigravid ' + variable], dataframe.index, color = 'tab:orange', marker = '^', label = 'Primigravid')
@@ -1327,7 +1335,7 @@ def show_stats_parity(dataframe, variable, threshold = None):
         plt.xlabel(variable)
     plt.legend()
     plt.show()
-    
+
 general_sero = ['MSP1','HSP40', 'Etramp', 'ACS5','EBA175', \
  'PfTramp','GEXP18','PfRH2','PfRH5', 'pAMA1', 'PvLDH', \
 'PfHRP2', 'PfLDH']
