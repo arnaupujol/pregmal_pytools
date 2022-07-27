@@ -370,7 +370,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                           linking_dist, test_result = None, show_maps = True, gif_delay = 30, method = 'fof', \
                          output_path = '/tmp/', save = True, bins2d = 50, label2plot = 'lifetime', \
                          kernel_size = 1, max_p_lifetimes = 1, name_end = '', plot_date = 'month', \
-                         xlims = None, ylims = None, version = 'fof'):
+                         xlims = None, ylims = None, version = 'fof', object_name = 'hotspot'):
     #temporal loop
     min_date = index['date'].min()
     max_date = index['date'].max()
@@ -442,15 +442,15 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             if np.sum(positives) == 0:#To keep the legend of cases in hotspots even when there are no cases
                 mockdf = pd.DataFrame({'lng' : [.0], 'lat' : [.0]})
                 mockdf = geopandas.GeoDataFrame(mockdf, geometry = geopandas.points_from_xy(mockdf['lng'], mockdf['lat']))
-                mockdf.plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside hotspot')
+                mockdf.plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside ' + object_name)
             else:
-                df_to_plot[positives].plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside hotspot')
+                df_to_plot[positives].plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside ' + object_name)
             if np.sum(hotspot > 0) == 0:#To keep the legend of cases in hotspots even when there are no cases
                 mockdf = pd.DataFrame({'lng' : [.0], 'lat' : [.0]})
                 mockdf = geopandas.GeoDataFrame(mockdf, geometry = geopandas.points_from_xy(mockdf['lng'], mockdf['lat']))
-                mockdf.plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in hotspot')
+                mockdf.plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
             else:
-                df_to_plot[positives][hotspot > 0].plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in hotspot')
+                df_to_plot[positives][hotspot > 0].plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
             ax.set_xlim(xrange[0], xrange[1])
             ax.set_ylim(yrange[0], yrange[1])
             ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
@@ -514,36 +514,36 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     plt.figure(figsize = [8,8])
     hist2d_hotspots[hist2d_hotspots == 0] = np.nan
     plt.imshow(hist2d_hotspots.T[::-1], cmap = 'turbo')
-    plt.title('Number of hotspot appearences per pixel')
+    plt.title('Number of '+object_name+' appearences per pixel')
     plt.xticks([])
     plt.yticks([])
     plt.colorbar()
     plt.show()
 
     plt.plot(mean_date, hot_num)
-    plt.title('Number of hotspots')
-    plt.ylabel('Number of hotspots')
+    plt.title('Number of ' + object_name + 's')
+    plt.ylabel('Number of ' + object_name + 's')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
 
     plt.plot(mean_date, mean_hot_size, marker = 'o')
-    plt.title('Mean hotspot size')
-    plt.ylabel('Mean hotspot size')
+    plt.title('Mean '+object_name+' size')
+    plt.ylabel('Mean '+object_name+' size')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
 
     plt.plot(mean_date, num_cases_in_hot)
-    plt.title('Number of cases in hotspots')
-    plt.ylabel('Number of cases in hotspots')
+    plt.title('Number of cases in ' + object_name + 's')
+    plt.ylabel('Number of cases in ' + object_name + 's')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
 
     plt.plot(mean_date, fraction_cases_in_hot)
-    plt.title('Fraction of cases in hotspots')
-    plt.ylabel('Fraction of cases in hotspots')
+    plt.title('Fraction of cases in ' + object_name + 's')
+    plt.ylabel('Fraction of cases in ' + object_name + 's')
     plt.xlabel('Date')
     plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
     plt.show()
@@ -558,10 +558,11 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 ylims = ylims, vmin = min(labels2plot), vmax = max(labels2plot), \
                 version = version)
 
-    hist_timelifes(fof_catalogues_lowp, version = version)
+    hist_timelifes(fof_catalogues_lowp, version = version, object_name = object_name)
 
     lifetime_timeline(fof_catalogues_lowp, mean_date, time_steps, \
-                        kernel_size = kernel_size, version = version)
+                        kernel_size = kernel_size, version = version, \
+                        object_name = object_name)
 
     if save:
         #Generating GIF of maps
@@ -601,7 +602,7 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
     plt.show()
 
 def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
-                        version = 'fof'):
+                        version = 'fof', object_name = 'hotspot'):
     if version == 'fof':
         tempids = fof.get_label_list(fof_cat, label = 'tempID')
         lifetimes = fof.get_label_list(fof_cat, label = 'lifetime')
@@ -633,7 +634,7 @@ def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
                 lw = 2)
     plt.xlabel("Date")
     plt.xticks(mean_date_test[::int(len(mean_date_test)/4)])
-    plt.ylabel("Number of cases in hotspot")
+    plt.ylabel("Number of cases in " + object_name)
     plt.ylim(ymin = 0.1)
     cNorm = colors.Normalize(vmin=0, vmax=max(lifetimes))
     plt.colorbar(cm.ScalarMappable(norm = cNorm, cmap='turbo'), label = 'Lifetime')
@@ -661,7 +662,8 @@ def fof_cut(fofid, min_num):
     return fofid
 
 def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
-                   c = None, range = None, version = 'fof'):
+                   c = None, range = None, version = 'fof', \
+                   object_name = 'hotspot'):
     if version == 'fof':
         all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
     elif version == 'epifriends':
@@ -678,8 +680,8 @@ def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
                     break
         plt.hist(lifetimes, 50, label = label, alpha = alpha, color = c, \
                 range = range)
-        plt.xlabel("Time duration of hotspots (days)")
-        plt.ylabel("Number of hotspots")
+        plt.xlabel("Time duration of "+object_name+"s (days)")
+        plt.ylabel("Number of " + object_name + 's')
         if show:
             plt.show()
 

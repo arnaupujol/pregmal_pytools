@@ -1294,7 +1294,9 @@ def show_chi2_cross_mip_vs_dtime(mipmon_areas, cross_areas, test_type, cross_bin
     plt.ylabel(r'$\chi^2$')
     plt.legend()
 
-def show_2dstats_parity(dataframe, variable1, variable2, threshold1, threshold2, parity_list = ['All prenatal', 'Primigravid', 'Multigravid'], figsize = None):
+def show_2dstats_parity(dataframe, variable1, variable2, threshold1, threshold2, \
+                        parity_list = ['All prenatal', 'Primigravid', 'Multigravid'], \
+                        figsize = None, show = True, xlims = None, ylims = None):
     colours = [cm.turbo(i/len(parity_list)) for i in range(len(parity_list))]
     plt.figure(figsize = figsize)
     for i in dataframe.index:
@@ -1305,8 +1307,10 @@ def show_2dstats_parity(dataframe, variable1, variable2, threshold1, threshold2,
     xmax = max([dataframe[i + ' ' + variable1].max() for i in parity_list])
     ymin = min([dataframe[i + ' ' + variable2].min() for i in parity_list])
     ymax = max([dataframe[i + ' ' + variable2].max() for i in parity_list])
-    xlims = [xmin, xmax*1.3]
-    ylims = [ymin*.95, ymax*1.05]
+    if xlims is None:
+        xlims = [xmin, xmax*1.3]
+    if ylims is None:
+        ylims = [ymin*.95, ymax*1.05]
 
     if threshold1 is not None:
         plt.vlines(threshold1, ylims[0], ylims[1], color = 'tab:grey')
@@ -1321,7 +1325,8 @@ def show_2dstats_parity(dataframe, variable1, variable2, threshold1, threshold2,
     plt.ylim(ylims)
     plt.xlabel(variable1)
     plt.ylabel(variable2)
-    plt.show()
+    if show:
+        plt.show()
 
 def show_stats_parity(dataframe, variable, threshold = None):
     plt.scatter(dataframe['All prenatal ' + variable], dataframe.index, color = 'tab:blue', marker = 's', label = 'All prenatal')
