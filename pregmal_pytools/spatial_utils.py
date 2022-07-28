@@ -42,7 +42,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
                       pop1name = 'MiPMon', pop2name = 'children 2-10', \
                       pos1name = r'$P.\ falciparum$ infection (detected by PCR)', \
                        pos2name = r'$P.\ falciparum$ infection (detected by PCR)', \
-                      extra_title = "", xlims = None, ylims = None):
+                      extra_title = "", xlims = None, ylims = None, cmap = 'rainbow'):
 
     print("Number of FOFs in " + pop1name+ ":", len(fof_catalogue_mip))
     mask_mip = (fof_catalogue_mip['positives']>=min_size_fof)&\
@@ -63,8 +63,10 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     #Mapping FOFs
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-    fof_catalogue_mip[mask_mip].plot(ax = ax, column = 'mean_pr', markersize = 30*fof_catalogue_mip['positives'][mask_mip], alpha = .75, \
-                       label = pop1name, cmap = 'rainbow', vmin = 0, vmax = 1, legend = True)
+    fof_catalogue_mip[mask_mip].plot(ax = ax, column = 'mean_pr', \
+                                    markersize = 30*fof_catalogue_mip['positives'][mask_mip], \
+                                    alpha = .75, label = pop1name, cmap = cmap, \
+                                    vmin = 0, vmax = 1, legend = True, legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$'})
     if np.sum(mask_mip) == 0:
         legend = True
     else:
@@ -74,7 +76,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     locations.plot(ax = ax, color = 'k', markersize = 20)
     locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
     plt.legend()
-    plt.title("Spatial distribution of hotspots" + extra_title)
+    plt.title(extra_title) #"Spatial distribution of hotspots" + extra_title)
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
@@ -86,17 +88,18 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     unique_fofids = fof_catalogue_mip[mask_mip]['id'].unique()#TODO test
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-    mipmon[mip_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = 'All study ' + pop1name)
+    mipmon[mip_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = pop1name)
     id_mask = np.array([f in unique_fofids for f in fofid_mip], dtype = bool)#change to kept ids
 
     mipmon[mip_positive&mip_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_mip[id_mask], \
                                                        markersize = 15, alpha = 1, \
                                                        label = pos1name, \
-                                                       cmap = 'rainbow', legend = True)
+                                                       cmap = cmap, legend = True, \
+                                                       legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$'})
     locations.plot(ax = ax, color = 'k', markersize = 20)
     locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
     plt.legend()
-    plt.title("Spatial distribution of " + pop1name + " data" + extra_title)
+    plt.title(extra_title) #"Spatial distribution of " + pop1name + " data" + extra_title)
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
@@ -109,11 +112,12 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     unique_fofids = fof_catalogue_c210[mask_c210]['id'].unique()#TODO test
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-    cross210[c210_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = 'All study ' + pop2name)
+    cross210[c210_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = pop2name)
     id_mask = np.array([f in unique_fofids for f in fofid_c210], dtype = bool)#change to kept ids
     cross210[c210_positive&c210_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_c210[id_mask], markersize = 15, alpha = 1, \
                                         label = pos2name, \
-                                       cmap = 'rainbow', legend = True)
+                                       cmap = cmap, legend = True, \
+                                       legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$'})
     locations.plot(ax = ax, color = 'k', markersize = 20)
     locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
     plt.legend()
