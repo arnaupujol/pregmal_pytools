@@ -120,6 +120,9 @@ def get_mipmon_prev_bins(mipmon, mipmon_areas, test_type, cross_dates, time_widt
     elif test_type == 'pcr':
         mask = mask&mipmon['pcrpos'].notnull()&mipmon_areas_mask
         test_mipmon = mipmon['pcrpos']
+    else:
+        mask = mask&mipmon[test_type].notnull()&mipmon_areas_mask
+        test_mipmon = mipmon[test_type]
     #Define MiPMon time bins
     mipmon_bins = []
     for i in cross_dates:
