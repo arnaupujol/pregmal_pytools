@@ -595,7 +595,7 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
                 plot_started = True
             else:
                  fof_cat_list[t].plot(ax = ax, column = label, markersize = 15, \
-                                         vmin = 0, vmax = vmax, cmap = 'turbo')
+                                         vmin = vmin, vmax = vmax, cmap = 'turbo')
     ax.set_xlim(xrange)
     ax.set_ylim(yrange)
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
@@ -798,27 +798,30 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
                          excluded_plots = []):
     if 'id' in show_plots and 'id' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = id_data[id_data > 0], cmap = 'turbo')
+                    c = id_data[id_data > 0], cmap = 'turbo', edgecolor = 'tab:red')
         plt.colorbar()
         plt.title("ID of hotspots")
         plt.show()
 
     if 'pr' in show_plots and 'pr' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = pr_data[id_data > 0], cmap = 'turbo')
+                    c = pr_data[id_data > 0], cmap = 'turbo', edgecolor = 'tab:red')
         plt.colorbar()
         plt.title("PR of hotspots")
         plt.show()
 
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
         p_vals = np.array([fof_catalogue[fof_catalogue['id'] == i]['p'] for i in id_data[id_data > 0]], \
                           dtype = float)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = p_vals, cmap = 'turbo')
+                    c = p_vals, cmap = 'turbo', edgecolor = 'tab:red')
         plt.colorbar()
         plt.title("P-value of hotspots")
         plt.show()
@@ -866,28 +869,34 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
                          excluded_plots = []):
     if 'id' in show_plots and 'id' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.CLUSTER'][mask], cmap = 'turbo')
+                    c = points_data['gis.CLUSTER'][mask], cmap = 'turbo', \
+                    edgecolor = 'tab:red')
         plt.colorbar()
         plt.title("ID of hotspots")
         plt.show()
 
     if 'pr' in show_plots and 'pr' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.CLU_OBS'][mask]/points_data['gis.CLU_POP'][mask], cmap = 'turbo')
+                    c = points_data['gis.CLU_OBS'][mask]/points_data['gis.CLU_POP'][mask], cmap = 'turbo', \
+                    edgecolor = 'tab:red')
         plt.colorbar()
         plt.title("PR of hotspots")
         plt.show()
 
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.P_VALUE'][mask], cmap = 'turbo')
+                    c = points_data['gis.P_VALUE'][mask], cmap = 'turbo', \
+                    edgecolor = 'tab:red')
         plt.colorbar()
         plt.title("P-value of hotspots")
         plt.show()
