@@ -152,7 +152,7 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
                            time_width, time_shift, print_sizes = True, \
                            cross_mask = None, mip_mask = None, title = '', \
                            verbose = True, show_fit = True, show_identity = True, show = True, \
-                      xmin = None, xmax = None, colors = None):
+                      xmin = None, xmax = None, colors = None, legend = True):
     """
     This method shows the scatter comparison between MiPMon and Cross-sectional
     data and outputs the linear fit parameters and the Pearson CC.
@@ -217,10 +217,10 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
         testlabel = 'RDT'
     elif mip_test_type == 'pcr':
         testlabel = 'qPCR'
-    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ pregnant women')
-    plt.title(title)
+    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ ' + title)
     plt.xlim(xmin, xmax)
-    plt.legend()
+    if legend:
+        plt.legend()
     if show:
         plt.show()
     return p_all, pcorr_all

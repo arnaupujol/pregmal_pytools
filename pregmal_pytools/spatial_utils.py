@@ -374,10 +374,13 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                           linking_dist, test_result = None, show_maps = True, gif_delay = 30, method = 'fof', \
                          output_path = '/tmp/', save = True, bins2d = 50, label2plot = 'lifetime', \
                          kernel_size = 1, max_p_lifetimes = 1, name_end = '', plot_date = 'month', \
-                         xlims = None, ylims = None, version = 'fof', object_name = 'hotspot'):
+                         xlims = None, ylims = None, version = 'fof', object_name = 'hotspot', \
+                         min_date = None, max_date = None):
     #temporal loop
-    min_date = index['date'].min()
-    max_date = index['date'].max()
+    if min_date is None:
+        min_date = index['date'].min()
+    if max_date is None:
+        max_date = index['date'].max()
     #Reseting loop variables
     mean_date = []
     hot_num = []

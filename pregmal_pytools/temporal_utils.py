@@ -858,7 +858,7 @@ def get_clinic_amplitude_chi2(mipmon_prev, mipmon_err, clinic_bins, clinic_err, 
                         clinic_for_ls = clinic_bins
                     else:
                         clinic_for_ls = clinic_bins_r[:,r]
-                mask = (mipmon_prev_r[:,r] > 0)&(clinic_for_ls>0)#TODO change >= to >
+                mask = (mipmon_prev_r[:,r] >= 0)&(clinic_for_ls>=0)#TODO change >= to >
                 k_r, out = optimization.leastsq(residual, 1., args=(mipmon_prev_r[:,r][mask], mipmon_err[mask], clinic_for_ls[mask], clinic_err[mask]))#TODO test
                 pcorr_r.append(sci_stats.pearsonr(mipmon_prev_r[:,r][mask], k_r*clinic_for_ls[mask])[0])#TODO test
             pcorr_r = np.array(pcorr_r)#TODO test
