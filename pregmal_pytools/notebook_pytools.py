@@ -205,7 +205,7 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
         xmax = np.max(all_vals)*1.05
     xplot = np.array([xmin, xmax])
     if show_identity:
-        plt.plot(xplot, xplot, color = 'tab:grey', label = 'Identity')
+        plt.plot(xplot, xplot, color = 'tab:grey', label = 'Identical')
     if show_fit:
         plt.plot(xplot, p_all[1] + p_all[0]*xplot, lw = 2, color = 'k', linestyle = '--', label = 'Linear regression')
     if cross_test_type == 'rdt':
