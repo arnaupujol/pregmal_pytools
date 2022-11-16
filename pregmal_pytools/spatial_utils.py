@@ -11,19 +11,19 @@ from stat_tools import estimations
 
 list_locs = {
     'Manhica' : [32.80722050, -25.40221980], #From Pau Cisteró excel
-    'Maputo' : [32.576388888888889, -25.915277666666],
+    #'Maputo' : [32.576388888888889, -25.915277666666],
     #'Montepuez' : [38.99972150, -13.12555980], #From Pau Cisteró excel
-    'Chokwe' : [33.005166666666666667, -24.5252777777777777],
+    #'Chokwe' : [33.005166666666666667, -24.5252777777777777],
     #'Moatize' : [33.73333040, -16.11666620], #From Pau Cisteró excel
     #'Dondo' : [34.75, -19.6166666666666667],
     'Magude' : [32.64216410, -25.02049992], #From Pau Cisteró excel
     'Ilha Josina' : [32.92210000, -25.09330000], #From Pau Cisteró excel
-    'Xinavane' : [32.791885, -25.048534],
-    'Panjane' : [32.352430, -24.899469],
-    'Motaze' : [32.860569, -24.810357],
-    'Mapulanguene' : [32.081602, -24.491015],
-    'Taninga' : [32.825796, -25.182094],
-    'Palmeira' : [32.869766, -25.261457],
+    #'Xinavane' : [32.791885, -25.048534],
+    #'Panjane' : [32.352430, -24.899469],
+    #'Motaze' : [32.860569, -24.810357],
+    #'Mapulanguene' : [32.081602, -24.491015],
+    #'Taninga' : [32.825796, -25.182094],
+    #'Palmeira' : [32.869766, -25.261457],
     #'Massinga' : [35.37405260,-23.32666250], #From Pau Cisteró excel
     #'Mopeia' : [35.71338490, -17.97391000], #From Pau Cisteró excel
     }
@@ -42,7 +42,8 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
                       pop1name = 'MiPMon', pop2name = 'children 2-10', \
                       pos1name = r'$P.\ falciparum$ infection (detected by PCR)', \
                        pos2name = r'$P.\ falciparum$ infection (detected by PCR)', \
-                      extra_title = "", xlims = None, ylims = None, cmap = 'rainbow'):
+                      extra_title = "", xlims = None, ylims = None, cmap = 'rainbow', \
+                      fontsize = 10, legend_plot = True):
 
     print("Number of FOFs in " + pop1name+ ":", len(fof_catalogue_mip))
     mask_mip = (fof_catalogue_mip['positives']>=min_size_fof)&\
@@ -94,12 +95,18 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     mipmon[mip_positive&mip_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_mip[id_mask], \
                                                        markersize = 15, alpha = 1, \
                                                        label = pos1name, \
-                                                       cmap = cmap, legend = True, \
-                                                       legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$'})
+                                                       cmap = cmap, legend = legend_plot, vmin = 0, \
+                                                       vmax = 1, \
+                                                       legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$', \
+                                                                    'orientation' : 'horizontal'})
     locations.plot(ax = ax, color = 'k', markersize = 20)
-    locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
-    plt.legend()
-    plt.title(extra_title) #"Spatial distribution of " + pop1name + " data" + extra_title)
+    locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0], \
+                                            fontsize = fontsize), axis=1)
+    ax.tick_params(axis = 'x', labelsize = fontsize)
+    ax.tick_params(axis = 'y', labelsize = fontsize)
+    if legend_plot:
+        plt.legend(fontsize = fontsize, framealpha = 1)
+    plt.title(extra_title, fontsize = fontsize) #"Spatial distribution of " + pop1name + " data" + extra_title)
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
@@ -375,7 +382,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                          output_path = '/tmp/', save = True, bins2d = 50, label2plot = 'lifetime', \
                          kernel_size = 1, max_p_lifetimes = 1, name_end = '', plot_date = 'month', \
                          xlims = None, ylims = None, version = 'fof', object_name = 'hotspot', \
-                         min_date = None, max_date = None):
+                         min_date = None, max_date = None, fontsize = None):
     #temporal loop
     if min_date is None:
         min_date = index['date'].min()
@@ -528,10 +535,11 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     plt.show()
 
     plt.plot(mean_date, hot_num)
-    plt.title('Number of ' + object_name + 's')
-    plt.ylabel('Number of ' + object_name + 's')
-    plt.xlabel('Date')
-    plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
+    #plt.title('Number of ' + object_name + 's')
+    plt.ylabel('Number of ' + object_name + 's', fontsize = fontsize)
+    plt.xlabel('Date', fontsize = fontsize)
+    plt.xticks(pd.to_datetime(['2017', '2018', '2019']), labels = ['2017', '2018', '2019'], fontsize = fontsize)
+    plt.yticks(fontsize = fontsize)
     plt.show()
 
     plt.plot(mean_date, mean_hot_size, marker = 'o')
@@ -565,11 +573,12 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 ylims = ylims, vmin = min(labels2plot), vmax = max(labels2plot), \
                 version = version)
 
-    hist_timelifes(fof_catalogues_lowp, version = version, object_name = object_name)
+    hist_timelifes(fof_catalogues_lowp, version = version, \
+                    object_name = object_name, fontsize = fontsize)
 
     lifetime_timeline(fof_catalogues_lowp, mean_date, time_steps, \
                         kernel_size = kernel_size, version = version, \
-                        object_name = object_name)
+                        object_name = object_name, fontsize = fontsize)
 
     if save:
         #Generating GIF of maps
@@ -609,7 +618,8 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
     plt.show()
 
 def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
-                        version = 'fof', object_name = 'hotspot'):
+                        version = 'fof', object_name = 'hotspot', \
+                        fontsize = None):
     if version == 'fof':
         tempids = fof.get_label_list(fof_cat, label = 'tempID')
         lifetimes = fof.get_label_list(fof_cat, label = 'lifetime')
@@ -639,12 +649,14 @@ def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
         num_cases_convolved = estimations.convolve_ones(num_cases, kernel_size)
         plt.plot(mean_date_test, num_cases_convolved, color = cm.turbo(lifetime/max(lifetimes)), \
                 lw = 2)
-    plt.xlabel("Date")
-    plt.xticks(mean_date_test[::int(len(mean_date_test)/4)])
-    plt.ylabel("Number of cases in " + object_name)
+    plt.xlabel("Date", fontsize = fontsize)
+    plt.xticks(pd.to_datetime(['2017', '2018', '2019']), labels = ['2017', '2018', '2019'], fontsize = fontsize)
+    plt.yticks(fontsize = fontsize)
+    plt.ylabel("Number of cases in " + object_name, fontsize = fontsize)
     plt.ylim(ymin = 0.1)
     cNorm = colors.Normalize(vmin=0, vmax=max(lifetimes))
-    plt.colorbar(cm.ScalarMappable(norm = cNorm, cmap='turbo'), label = 'Lifetime')
+    cb = plt.colorbar(cm.ScalarMappable(norm = cNorm, cmap='turbo'))
+    cb.set_label(label = 'Lifetime', size = fontsize)
     plt.show()
 
 
@@ -670,7 +682,7 @@ def fof_cut(fofid, min_num):
 
 def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
                    c = None, range = None, version = 'fof', \
-                   object_name = 'hotspot'):
+                   object_name = 'hotspot', fontsize = None):
     if version == 'fof':
         all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
     elif version == 'epifriends':
@@ -687,8 +699,12 @@ def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
                     break
         plt.hist(lifetimes, 50, label = label, alpha = alpha, color = c, \
                 range = range)
-        plt.xlabel("Time duration of "+object_name+"s (days)")
-        plt.ylabel("Number of " + object_name + 's')
+        plt.xlabel("Time duration of "+object_name+"s (days)", \
+                    fontsize = fontsize)
+        plt.ylabel("Number of " + object_name + 's', \
+                    fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         if show:
             plt.show()
 

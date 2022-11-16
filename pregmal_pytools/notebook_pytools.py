@@ -152,7 +152,8 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
                            time_width, time_shift, print_sizes = True, \
                            cross_mask = None, mip_mask = None, title = '', \
                            verbose = True, show_fit = True, show_identity = True, show = True, \
-                      xmin = None, xmax = None, colors = None, legend = True):
+                      xmin = None, xmax = None, colors = None, legend = True, \
+                      fontsize = None, frameon = True, framealpha = 1):
     """
     This method shows the scatter comparison between MiPMon and Cross-sectional
     data and outputs the linear fit parameters and the Pearson CC.
@@ -212,15 +213,17 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
         testlabel = 'RDT'
     elif cross_test_type == 'pcr':
         testlabel = 'qPCR'
-    plt.xlabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ cross-sectional (2-10 years)')
+    plt.xlabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ children', fontsize = fontsize)
     if mip_test_type == 'rdt':
         testlabel = 'RDT'
     elif mip_test_type == 'pcr':
         testlabel = 'qPCR'
-    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ ' + title)
+    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ ' + title, fontsize = fontsize)
     plt.xlim(xmin, xmax)
+    plt.yticks(fontsize = fontsize)
+    plt.xticks(fontsize = fontsize)
     if legend:
-        plt.legend()
+        plt.legend(fontsize = fontsize, frameon = frameon, framealpha = framealpha)
     if show:
         plt.show()
     return p_all, pcorr_all
