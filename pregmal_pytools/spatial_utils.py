@@ -815,34 +815,51 @@ def get_mock_dataframe(x_rand, y_rand, test_rand, save = True, output_file = 'mo
 
 def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalogue, \
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
-                         excluded_plots = []):
+                         excluded_plots = [], fontsize = None, cmap = 'turbo', \
+                         pvmin = -5, pvmax = 0, s = 10):
     if 'id' in show_plots and 'id' not in excluded_plots:
-        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
-        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', \
+                    s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', \
+                    s = s)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = id_data[id_data > 0], cmap = 'turbo', edgecolor = 'tab:red')
-        plt.colorbar()
-        plt.title("ID of hotspots")
+                    c = id_data[id_data > 0], cmap = cmap, edgecolor = 'tab:red', \
+                    s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "ID of foci", size = fontsize)
+        #plt.title("ID of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'pr' in show_plots and 'pr' not in excluded_plots:
-        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
-        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', \
+                    s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', \
+                    s = s)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = pr_data[id_data > 0], cmap = 'turbo', edgecolor = 'tab:red')
-        plt.colorbar()
-        plt.title("PR of hotspots")
+                    c = pr_data[id_data > 0], cmap = cmap, edgecolor = 'tab:red', \
+                    s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "PR of foci", size = fontsize)
+        #plt.title("PR of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
-        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
-        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         p_vals = np.array([fof_catalogue[fof_catalogue['id'] == i]['p'] for i in id_data[id_data > 0]], \
                           dtype = float)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = p_vals, cmap = 'turbo', edgecolor = 'tab:red')
-        plt.colorbar()
-        plt.title("P-value of hotspots")
+                    c = np.log10(p_vals), cmap = cmap, edgecolor = 'tab:red', \
+                    vmin = pvmin, vmax = pvmax, s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "Log(p)", size = fontsize)
+        #plt.title("P-value of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-hist' in show_plots and 'p-hist' not in excluded_plots:
@@ -855,9 +872,11 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
                      range = [0,1], label = '>'+str(s)+' cases', color = colors[i], alpha = .75)
         plt.xlim(0,1)
         plt.vlines(.05, 0, np.max(hist)*1.1, color = 'tab:orange')
-        plt.ylabel("Number of hotspots")
-        plt.xlabel("P-value")
-        plt.legend()
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
+        plt.xlabel("P-value", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'ncases-hist' in show_plots and 'ncases-hist' not in excluded_plots:
@@ -869,55 +888,69 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
                                               range = [np.min(fof_catalogue['total']), \
                                                        np.max(fof_catalogue['total'])], \
                                               color = 'tab:blue', label = 'p > 0.05')
-        plt.ylabel("Number of hotspots")
-        plt.xlabel("Number of cases in hotspots")
-        plt.legend()
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'falseposfrac' in show_plots and 'falseposfrac' not in excluded_plots:
         mask = np.isfinite(hist_highp/hist_all)
         plt.plot(edges[:-1][mask], 1 - hist_highp[mask]/hist_all[mask], label = 'False positive fraction')
         plt.plot(edges[:-1][mask], 0*edges[:-1][mask] + .05, c = 'tab:grey', label = '10%')
-        plt.xlabel("Number of cases in hotspots")
-        plt.ylabel("False positive fraction")
-        plt.legend()
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.ylabel("False positive fraction", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
 
 def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_data, \
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
-                         excluded_plots = []):
+                         excluded_plots = [], fontsize = None, cmap = 'turbo', \
+                         pvmin = -5, pvmax = 0, s = 10):
     if 'id' in show_plots and 'id' not in excluded_plots:
-        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
-        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.CLUSTER'][mask], cmap = 'turbo', \
-                    edgecolor = 'tab:red')
-        plt.colorbar()
-        plt.title("ID of hotspots")
+                    c = points_data['gis.CLUSTER'][mask], cmap = cmap, \
+                    edgecolor = 'tab:red', s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "ID of foci", size = fontsize)
+        #plt.title("ID of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'pr' in show_plots and 'pr' not in excluded_plots:
-        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
-        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.CLU_OBS'][mask]/points_data['gis.CLU_POP'][mask], cmap = 'turbo', \
-                    edgecolor = 'tab:red')
-        plt.colorbar()
-        plt.title("PR of hotspots")
+                    c = points_data['gis.CLU_OBS'][mask]/points_data['gis.CLU_POP'][mask], cmap = cmap, \
+                    edgecolor = 'tab:red', s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "PR of foci", size = fontsize)
+        #plt.title("PR of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
-        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey')
-        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.P_VALUE'][mask], cmap = 'turbo', \
-                    edgecolor = 'tab:red')
-        plt.colorbar()
-        plt.title("P-value of hotspots")
+                    c = np.log10(points_data['gis.P_VALUE'][mask]), cmap = cmap, \
+                    edgecolor = 'tab:red', vmin = pvmin, vmax = pvmax, s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "Log(p)", size = fontsize)
+        #plt.title("P-value of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-hist' in show_plots and 'p-hist' not in excluded_plots:
@@ -930,9 +963,11 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
                      range = [0,1], label = '>'+str(s)+' cases', color = colors[i], alpha = .75)
         plt.xlim(0,1)
         plt.vlines(.05, 0, np.max(hist)*1.1, color = 'tab:orange')
-        plt.ylabel("Number of hotspots")
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
         plt.xlabel("P-value")
-        plt.legend()
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'ncases-hist' in show_plots and 'ncases-hist' not in excluded_plots:
@@ -944,18 +979,22 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
                                               range = [np.min(clusters_data['col.POPULATION']), \
                                                        np.max(clusters_data['col.POPULATION'])], \
                                               color = 'tab:blue', label = 'p > 0.05')
-        plt.ylabel("Number of hotspots")
-        plt.xlabel("Number of cases in hotspots")
-        plt.legend()
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'falseposfrac' in show_plots and 'falseposfrac' not in excluded_plots:
         mask = np.isfinite(hist_highp/hist_all)
         plt.plot(edges[:-1][mask], 1 - hist_highp[mask]/hist_all[mask], label = 'False positive fraction')
         plt.plot(edges[:-1][mask], 0*edges[:-1][mask] + .05, c = 'tab:grey', label = '10%')
-        plt.xlabel("Number of cases in hotspots")
-        plt.ylabel("False positive fraction")
-        plt.legend()
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.ylabel("False positive fraction", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
 def get_study_year(mipmon):
