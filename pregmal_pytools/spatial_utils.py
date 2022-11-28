@@ -63,7 +63,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
 
     #Mapping FOFs
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
     fof_catalogue_mip[mask_mip].plot(ax = ax, column = 'mean_pr', \
                                     markersize = 30*fof_catalogue_mip['positives'][mask_mip], \
                                     alpha = .75, label = pop1name, cmap = cmap, \
@@ -88,7 +88,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     print("Number of FOFs:", len(fof_catalogue_mip[mask_mip]))
     unique_fofids = fof_catalogue_mip[mask_mip]['id'].unique()#TODO test
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
     mipmon[mip_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = pop1name)
     id_mask = np.array([f in unique_fofids for f in fofid_mip], dtype = bool)#change to kept ids
 
@@ -118,7 +118,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     print("Number of FOFs:", len(fof_catalogue_c210[mask_c210]))
     unique_fofids = fof_catalogue_c210[mask_c210]['id'].unique()#TODO test
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
     cross210[c210_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = pop2name)
     id_mask = np.array([f in unique_fofids for f in fofid_c210], dtype = bool)#change to kept ids
     cross210[c210_positive&c210_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_c210[id_mask], markersize = 15, alpha = 1, \
@@ -467,7 +467,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 df_to_plot[positives][hotspot > 0].plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
             ax.set_xlim(xrange[0], xrange[1])
             ax.set_ylim(yrange[0], yrange[1])
-            ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+            ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
             plt.legend(loc = 'upper left')
             date1 = pd.to_datetime(pd.Series(min_date + pd.to_timedelta(time_steps*step_num, unit = 'D')))
             date1 = date1.dt.strftime('%d/%m/%Y')[0]
@@ -610,7 +610,7 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
                                          vmin = vmin, vmax = vmax, cmap = 'turbo')
     ax.set_xlim(xrange)
     ax.set_ylim(yrange)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
