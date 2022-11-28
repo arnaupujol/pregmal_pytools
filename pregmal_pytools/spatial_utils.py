@@ -31,7 +31,7 @@ list_locs = {
 locations = pd.DataFrame({'location' : [i for i in list_locs], 'longitude': [list_locs[i][0] for i in list_locs], 'latitude': [list_locs[i][1] for i in list_locs]})
 locations = geopandas.GeoDataFrame(locations, geometry = geopandas.points_from_xy(locations['longitude'], locations['latitude']))
 locations = locations.set_crs(epsg=4326)
-locations = locations.to_crs(epsg=3857)
+locations = locations.to_crs(epsg=32736)
 
 def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
                        mipmon, cross210, mip_positive, c210_positive, \
@@ -266,7 +266,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
     #Geo locate cross
     cross = geopandas.GeoDataFrame(cross, geometry = geopandas.points_from_xy(cross['lng'], cross['lat']))
     cross = cross.set_crs(epsg=4326)
-    cross = cross.to_crs(epsg=3857)
+    cross = cross.to_crs(epsg=32736)
     #Filter Cross to only 2-10
     cross210 = cross[(cross['age']>=2)&(cross['age']<10)]
     #Load mipmon
@@ -274,7 +274,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
     #Geo locate mipmon
     mipmon = geopandas.GeoDataFrame(mipmon, geometry = geopandas.points_from_xy(mipmon['longitude'], mipmon['latitude']))
     mipmon = mipmon.set_crs(epsg=4326)
-    mipmon = mipmon.to_crs(epsg=3857)
+    mipmon = mipmon.to_crs(epsg=32736)
     cross['visdate'] = pd.to_datetime(cross['visdate'])
     cross210['visdate'] = pd.to_datetime(cross210['visdate'])
     mipmon['visdate'] = pd.to_datetime(mipmon['visdate'])
