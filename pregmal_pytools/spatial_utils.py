@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 import contextily as ctx
 from spatial_tools import fof
-from epifriends import epifriends
+from epifriends import epifriends, utils
 import os
 from stat_tools import estimations
 
@@ -337,6 +337,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
             mipmon[cutoff+'general_pos'] = np.array(mipmon[cutoff+'breadth_general'] >= 1, dtype = int)
             mipmon[cutoff+'pregnancy_pos'] = np.array(mipmon[cutoff+'breadth_pregnancy'] >= 1, dtype = int)
             mipmon[cutoff+'All peptides'] = np.array(mipmon[cutoff+'breadth_peptides'] >= 1, dtype = int)
+            mipmon[cutoff+'P1+P8'] = np.array(mipmon[cutoff+'P1'] + mipmon[cutoff+'P8'] >= 1, dtype = int)
         if 'breadth_general' not in excluded_antigens:
             antigens.append('breadth_general')
         if 'breadth_pregnancy' not in excluded_antigens:
@@ -347,6 +348,8 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
             antigens.append('pregnancy_pos')
         if 'All peptides' not in excluded_antigens:
             antigens.append('All peptides')
+        if 'P1+P8' not in excluded_antigens:
+            antigens.append('P1+P8')
 
         return mipmon, cross, cross210, antigens
     else:
@@ -1018,3 +1021,28 @@ def get_study_year(mipmon):
         elif mipmon['visdate'].iloc[i] >= pd.to_datetime(year_3[0]) and mipmon['visdate'].iloc[i] <= pd.to_datetime(year_3[1]):
             study_year[i] = 3
     return study_year
+
+def get_foci_years(epi_list, mean_dates):
+    all_tempid = utils.get_label_list(epi_list, 'tempID')
+    years = []
+    for tid in all_tempid:
+        times = find_timesteps_with_id(epi_list, tid)
+        dates = pd.DataFrame({'visdate' : pd.Series(mean_dates[times])})
+        year = get_study_year(dates)
+        years.append(int(round(np.mean(year),0)))
+    year_counts = count_foci_per_year(np.array(years))
+    return year_counts
+
+def count_foci_per_year(years):
+    year_counts = {}
+    year_counts['Year 1'] = np.sum(years == 1)
+    year_counts['Year 2'] = np.sum(years == 2)
+    year_counts['Year 3'] = np.sum(years == 3)
+    return year_counts
+
+def find_timesteps_with_id(epi_list, tempid):
+    timesteps = []
+    for i in range(len(epi_list)):
+        if tempid in epi_list[i]['tempID'].unique():
+            timesteps.append(i)
+    return timesteps

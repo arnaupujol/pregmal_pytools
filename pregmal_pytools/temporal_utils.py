@@ -95,6 +95,7 @@ def import_temporal_data(data_path = '~/isglobal/projects/pregmal/data/', \
         mipmon[cutoff+'general_pos'] = np.array(mipmon[cutoff+'breadth_general'] >= 1, dtype = int)
         mipmon[cutoff+'pregnancy_pos'] = np.array(mipmon[cutoff+'breadth_pregnancy'] >= 1, dtype = int)
         mipmon[cutoff+'All peptides'] = np.array(mipmon[cutoff+'breadth_peptides'] >= 1, dtype = int)
+        mipmon[cutoff+'P1+P8'] = np.array(mipmon[cutoff+'P1'] + mipmon[cutoff+'P8'] >= 1, dtype = int)
     if 'breadth_general' not in excluded_antigens:
         antigens.append('breadth_general')
     if 'breadth_pregnancy' not in excluded_antigens:
@@ -105,6 +106,8 @@ def import_temporal_data(data_path = '~/isglobal/projects/pregmal/data/', \
         antigens.append('pregnancy_pos')
     if 'All peptides' not in excluded_antigens:
         antigens.append('All peptides')
+    if 'P1+P8' not in excluded_antigens:
+        antigens.append('P1+P8')
 
     #Building incidence
     opd_2to9['incidence'] = 0
