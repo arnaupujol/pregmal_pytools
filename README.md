@@ -1,7 +1,7 @@
 # Pregmal Python Tools
 
 > Author: **Arnau Pujol**  
-> Year: **2022**  
+> Year: **2023**  
 > Version: **1.0**  
 
 This repository contains tools for statistical analyses for the PregMal project.
