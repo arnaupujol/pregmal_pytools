@@ -5,25 +5,25 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 import contextily as ctx
 from spatial_tools import fof
-from epifriends import epifriends
+from epifriends import epifriends, utils
 import os
 from stat_tools import estimations
 
 list_locs = {
     'Manhica' : [32.80722050, -25.40221980], #From Pau Cisteró excel
-    'Maputo' : [32.576388888888889, -25.915277666666],
+    #'Maputo' : [32.576388888888889, -25.915277666666],
     #'Montepuez' : [38.99972150, -13.12555980], #From Pau Cisteró excel
-    'Chokwe' : [33.005166666666666667, -24.5252777777777777],
+    #'Chokwe' : [33.005166666666666667, -24.5252777777777777],
     #'Moatize' : [33.73333040, -16.11666620], #From Pau Cisteró excel
     #'Dondo' : [34.75, -19.6166666666666667],
     'Magude' : [32.64216410, -25.02049992], #From Pau Cisteró excel
     'Ilha Josina' : [32.92210000, -25.09330000], #From Pau Cisteró excel
-    'Xinavane' : [32.791885, -25.048534],
-    'Panjane' : [32.352430, -24.899469],
-    'Motaze' : [32.860569, -24.810357],
-    'Mapulanguene' : [32.081602, -24.491015],
-    'Taninga' : [32.825796, -25.182094],
-    'Palmeira' : [32.869766, -25.261457],
+    #'Xinavane' : [32.791885, -25.048534],
+    #'Panjane' : [32.352430, -24.899469],
+    #'Motaze' : [32.860569, -24.810357],
+    #'Mapulanguene' : [32.081602, -24.491015],
+    #'Taninga' : [32.825796, -25.182094],
+    #'Palmeira' : [32.869766, -25.261457],
     #'Massinga' : [35.37405260,-23.32666250], #From Pau Cisteró excel
     #'Mopeia' : [35.71338490, -17.97391000], #From Pau Cisteró excel
     }
@@ -31,7 +31,7 @@ list_locs = {
 locations = pd.DataFrame({'location' : [i for i in list_locs], 'longitude': [list_locs[i][0] for i in list_locs], 'latitude': [list_locs[i][1] for i in list_locs]})
 locations = geopandas.GeoDataFrame(locations, geometry = geopandas.points_from_xy(locations['longitude'], locations['latitude']))
 locations = locations.set_crs(epsg=4326)
-locations = locations.to_crs(epsg=3857)
+locations = locations.to_crs(epsg=32736)
 
 def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
                        mipmon, cross210, mip_positive, c210_positive, \
@@ -42,7 +42,8 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
                       pop1name = 'MiPMon', pop2name = 'children 2-10', \
                       pos1name = r'$P.\ falciparum$ infection (detected by PCR)', \
                        pos2name = r'$P.\ falciparum$ infection (detected by PCR)', \
-                      extra_title = "", xlims = None, ylims = None):
+                      extra_title = "", xlims = None, ylims = None, cmap = 'rainbow', \
+                      fontsize = 10, legend_plot = True):
 
     print("Number of FOFs in " + pop1name+ ":", len(fof_catalogue_mip))
     mask_mip = (fof_catalogue_mip['positives']>=min_size_fof)&\
@@ -62,9 +63,11 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
 
     #Mapping FOFs
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-    fof_catalogue_mip[mask_mip].plot(ax = ax, column = 'mean_pr', markersize = 30*fof_catalogue_mip['positives'][mask_mip], alpha = .75, \
-                       label = pop1name, cmap = 'rainbow', vmin = 0, vmax = 1, legend = True)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
+    fof_catalogue_mip[mask_mip].plot(ax = ax, column = 'mean_pr', \
+                                    markersize = 30*fof_catalogue_mip['positives'][mask_mip], \
+                                    alpha = .75, label = pop1name, cmap = cmap, \
+                                    vmin = 0, vmax = 1, legend = True, legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$'})
     if np.sum(mask_mip) == 0:
         legend = True
     else:
@@ -74,7 +77,7 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     locations.plot(ax = ax, color = 'k', markersize = 20)
     locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
     plt.legend()
-    plt.title("Spatial distribution of hotspots" + extra_title)
+    plt.title(extra_title) #"Spatial distribution of hotspots" + extra_title)
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
@@ -85,18 +88,25 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     print("Number of FOFs:", len(fof_catalogue_mip[mask_mip]))
     unique_fofids = fof_catalogue_mip[mask_mip]['id'].unique()#TODO test
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-    mipmon[mip_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = 'All study ' + pop1name)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
+    mipmon[mip_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = pop1name)
     id_mask = np.array([f in unique_fofids for f in fofid_mip], dtype = bool)#change to kept ids
 
     mipmon[mip_positive&mip_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_mip[id_mask], \
                                                        markersize = 15, alpha = 1, \
                                                        label = pos1name, \
-                                                       cmap = 'rainbow', legend = True)
+                                                       cmap = cmap, legend = legend_plot, vmin = 0, \
+                                                       vmax = 1, \
+                                                       legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$', \
+                                                                    'orientation' : 'horizontal'})
     locations.plot(ax = ax, color = 'k', markersize = 20)
-    locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
-    plt.legend()
-    plt.title("Spatial distribution of " + pop1name + " data" + extra_title)
+    locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0], \
+                                            fontsize = fontsize), axis=1)
+    ax.tick_params(axis = 'x', labelsize = fontsize)
+    ax.tick_params(axis = 'y', labelsize = fontsize)
+    if legend_plot:
+        plt.legend(fontsize = fontsize, framealpha = 1)
+    plt.title(extra_title, fontsize = fontsize) #"Spatial distribution of " + pop1name + " data" + extra_title)
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
@@ -108,12 +118,13 @@ def visualise_all_fofs(fof_catalogue_mip, fof_catalogue_c210, \
     print("Number of FOFs:", len(fof_catalogue_c210[mask_c210]))
     unique_fofids = fof_catalogue_c210[mask_c210]['id'].unique()#TODO test
     ax = mipmon.plot(markersize = 0, figsize = [8,8], alpha = 0)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
-    cross210[c210_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = 'All study ' + pop2name)
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
+    cross210[c210_mask_year].plot(ax = ax, color = 'k', markersize = 5, alpha = 1, label = pop2name)
     id_mask = np.array([f in unique_fofids for f in fofid_c210], dtype = bool)#change to kept ids
     cross210[c210_positive&c210_mask_year][id_mask].plot(ax = ax, column = mean_pr_fof_c210[id_mask], markersize = 15, alpha = 1, \
                                         label = pos2name, \
-                                       cmap = 'rainbow', legend = True)
+                                       cmap = cmap, legend = True, \
+                                       legend_kwds = {'label' : r'$Pf\rm{PR}_{\rm{qPCR}}$'})
     locations.plot(ax = ax, color = 'k', markersize = 20)
     locations.apply(lambda x: ax.annotate(s=x.location, xy=x.loc['geometry'].coords[0]), axis=1)
     plt.legend()
@@ -255,7 +266,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
     #Geo locate cross
     cross = geopandas.GeoDataFrame(cross, geometry = geopandas.points_from_xy(cross['lng'], cross['lat']))
     cross = cross.set_crs(epsg=4326)
-    cross = cross.to_crs(epsg=3857)
+    cross = cross.to_crs(epsg=32736)
     #Filter Cross to only 2-10
     cross210 = cross[(cross['age']>=2)&(cross['age']<10)]
     #Load mipmon
@@ -263,7 +274,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
     #Geo locate mipmon
     mipmon = geopandas.GeoDataFrame(mipmon, geometry = geopandas.points_from_xy(mipmon['longitude'], mipmon['latitude']))
     mipmon = mipmon.set_crs(epsg=4326)
-    mipmon = mipmon.to_crs(epsg=3857)
+    mipmon = mipmon.to_crs(epsg=32736)
     cross['visdate'] = pd.to_datetime(cross['visdate'])
     cross210['visdate'] = pd.to_datetime(cross210['visdate'])
     mipmon['visdate'] = pd.to_datetime(mipmon['visdate'])
@@ -326,6 +337,7 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
             mipmon[cutoff+'general_pos'] = np.array(mipmon[cutoff+'breadth_general'] >= 1, dtype = int)
             mipmon[cutoff+'pregnancy_pos'] = np.array(mipmon[cutoff+'breadth_pregnancy'] >= 1, dtype = int)
             mipmon[cutoff+'All peptides'] = np.array(mipmon[cutoff+'breadth_peptides'] >= 1, dtype = int)
+            mipmon[cutoff+'P1+P8'] = np.array(mipmon[cutoff+'P1'] + mipmon[cutoff+'P8'] >= 1, dtype = int)
         if 'breadth_general' not in excluded_antigens:
             antigens.append('breadth_general')
         if 'breadth_pregnancy' not in excluded_antigens:
@@ -336,6 +348,8 @@ def import_spatial_data(data_path = '~/isglobal/projects/pregmal/data/', \
             antigens.append('pregnancy_pos')
         if 'All peptides' not in excluded_antigens:
             antigens.append('All peptides')
+        if 'P1+P8' not in excluded_antigens:
+            antigens.append('P1+P8')
 
         return mipmon, cross, cross210, antigens
     else:
@@ -370,10 +384,13 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                           linking_dist, test_result = None, show_maps = True, gif_delay = 30, method = 'fof', \
                          output_path = '/tmp/', save = True, bins2d = 50, label2plot = 'lifetime', \
                          kernel_size = 1, max_p_lifetimes = 1, name_end = '', plot_date = 'month', \
-                         xlims = None, ylims = None, version = 'fof', object_name = 'hotspot'):
+                         xlims = None, ylims = None, version = 'fof', object_name = 'hotspot', \
+                         min_date = None, max_date = None, fontsize = None, keep_null_tests = True):
     #temporal loop
-    min_date = index['date'].min()
-    max_date = index['date'].max()
+    if min_date is None:
+        min_date = index['date'].min()
+    if max_date is None:
+        max_date = index['date'].max()
     #Reseting loop variables
     mean_date = []
     hot_num = []
@@ -407,6 +424,12 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 fofid, mean_pr_fof, pval_fof, fof_catalogue = fof.get_fof_PR(positions, test_result_selected, scale)
             elif version == 'epifriends':
                 fofid, mean_pr_fof, pval_fof, fof_catalogue = epifriends.catalogue(positions, test_result_selected, scale)
+            elif version == 'epifriendsv1.1':
+                fofid, mean_pr_fof, pval_fof, fof_catalogue = epifriends.catalogue(index[selected_data]['x'], \
+                                                                                   index[selected_data]['y'], \
+                                                                                   test_result_selected, scale, \
+                                                                                   keep_null_tests = keep_null_tests, \
+                                                                                   verbose = False)
             else:
                 print("ERROR: wrong version name")
             #Removing FOFs with less than min_num cases
@@ -453,7 +476,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 df_to_plot[positives][hotspot > 0].plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
             ax.set_xlim(xrange[0], xrange[1])
             ax.set_ylim(yrange[0], yrange[1])
-            ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+            ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
             plt.legend(loc = 'upper left')
             date1 = pd.to_datetime(pd.Series(min_date + pd.to_timedelta(time_steps*step_num, unit = 'D')))
             date1 = date1.dt.strftime('%d/%m/%Y')[0]
@@ -498,7 +521,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     fof_catalogues_lowp = [fcat[fcat['p'] <= max_p_lifetimes] for fcat in fof_catalogues]
     if version == 'fof':
         fof_catalogues_lowp = fof.get_temp_id(fof_catalogues_lowp, linking_time, linking_dist)
-    elif version == 'epifriends':
+    elif version in ['epifriends', 'epifriendsv1.1']:
         fof_catalogues_lowp = epifriends.add_temporal_id(fof_catalogues_lowp, linking_time, linking_dist)
     else:
         print("ERROR: wrong version name")
@@ -521,10 +544,11 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
     plt.show()
 
     plt.plot(mean_date, hot_num)
-    plt.title('Number of ' + object_name + 's')
-    plt.ylabel('Number of ' + object_name + 's')
-    plt.xlabel('Date')
-    plt.xticks(index['date'].sort_values()[::int(len(index['date'])/3)-1])
+    #plt.title('Number of ' + object_name + 's')
+    plt.ylabel('Number of ' + object_name + 's', fontsize = fontsize)
+    plt.xlabel('Date', fontsize = fontsize)
+    plt.xticks(pd.to_datetime(['2017', '2018', '2019']), labels = ['2017', '2018', '2019'], fontsize = fontsize)
+    plt.yticks(fontsize = fontsize)
     plt.show()
 
     plt.plot(mean_date, mean_hot_size, marker = 'o')
@@ -550,7 +574,7 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
 
     if version == 'fof':
         labels2plot = fof.get_label_list(fof_catalogues_lowp, label = label2plot)
-    elif version == 'epifriends':
+    elif version in ['epifriends', 'epifriendsv1.1']:
         labels2plot = epifriends.get_label_list(fof_catalogues_lowp, label = label2plot)
     else:
         print("ERROR: wrong version name")
@@ -558,11 +582,12 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                 ylims = ylims, vmin = min(labels2plot), vmax = max(labels2plot), \
                 version = version)
 
-    hist_timelifes(fof_catalogues_lowp, version = version, object_name = object_name)
+    hist_timelifes(fof_catalogues_lowp, version = version, \
+                    object_name = object_name, fontsize = fontsize)
 
     lifetime_timeline(fof_catalogues_lowp, mean_date, time_steps, \
                         kernel_size = kernel_size, version = version, \
-                        object_name = object_name)
+                        object_name = object_name, fontsize = fontsize)
 
     if save:
         #Generating GIF of maps
@@ -574,10 +599,10 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
             fof_catalogues_lowp
 
 def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vmax = None, \
-              xlims = None, ylims = None, version = 'fof'):
+              xlims = None, ylims = None, version = 'fof', epsg = 32736):
     if version == 'fof':
         timelifes = fof.get_label_list(fof_cat_list, label = label)
-    elif version == 'epifriends':
+    elif version in ['epifriends', 'epifriendsv1.1']:
         timelifes = epifriends.get_label_list(fof_cat_list, label = label)
     else:
         print("ERROR: wrong version name")
@@ -591,10 +616,12 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
                 plot_started = True
             else:
                  fof_cat_list[t].plot(ax = ax, column = label, markersize = 15, \
-                                         vmin = 0, vmax = vmax, cmap = 'turbo')
+                                         vmin = vmin, vmax = vmax, cmap = 'turbo')
     ax.set_xlim(xrange)
     ax.set_ylim(yrange)
-    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+    if epsg is None:
+        epsg = 32736
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:'+str(epsg))
     if xlims is not None:
         plt.xlim(xlims[0], xlims[1])
     if ylims is not None:
@@ -602,11 +629,12 @@ def plot_label(fof_cat_list, xrange, yrange, label = 'lifetime', vmin = None, vm
     plt.show()
 
 def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
-                        version = 'fof', object_name = 'hotspot'):
+                        version = 'fof', object_name = 'hotspot', \
+                        fontsize = None):
     if version == 'fof':
         tempids = fof.get_label_list(fof_cat, label = 'tempID')
         lifetimes = fof.get_label_list(fof_cat, label = 'lifetime')
-    elif version == 'epifriends':
+    elif version in ['epifriends', 'epifriendsv1.1']:
         tempids = epifriends.get_label_list(fof_cat, label = 'tempID')
         lifetimes = epifriends.get_label_list(fof_cat, label = 'lifetime')
     else:
@@ -632,12 +660,14 @@ def lifetime_timeline(fof_cat, mean_date_test, time_steps, kernel_size = 1, \
         num_cases_convolved = estimations.convolve_ones(num_cases, kernel_size)
         plt.plot(mean_date_test, num_cases_convolved, color = cm.turbo(lifetime/max(lifetimes)), \
                 lw = 2)
-    plt.xlabel("Date")
-    plt.xticks(mean_date_test[::int(len(mean_date_test)/4)])
-    plt.ylabel("Number of cases in " + object_name)
+    plt.xlabel("Date", fontsize = fontsize)
+    plt.xticks(pd.to_datetime(['2017', '2018', '2019']), labels = ['2017', '2018', '2019'], fontsize = fontsize)
+    plt.yticks(fontsize = fontsize)
+    plt.ylabel("Number of cases in " + object_name, fontsize = fontsize)
     plt.ylim(ymin = 0.1)
     cNorm = colors.Normalize(vmin=0, vmax=max(lifetimes))
-    plt.colorbar(cm.ScalarMappable(norm = cNorm, cmap='turbo'), label = 'Lifetime')
+    cb = plt.colorbar(cm.ScalarMappable(norm = cNorm, cmap='turbo'))
+    cb.set_label(label = 'Lifetime', size = fontsize)
     plt.show()
 
 
@@ -663,10 +693,10 @@ def fof_cut(fofid, min_num):
 
 def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
                    c = None, range = None, version = 'fof', \
-                   object_name = 'hotspot'):
+                   object_name = 'hotspot', fontsize = None):
     if version == 'fof':
         all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
-    elif version == 'epifriends':
+    elif version in ['epifriends', 'epifriendsv1.1']:
         all_tempids = fof.get_label_list(fof_catalogues, label = 'tempID')
     else:
         print("ERROR: wrong version name")
@@ -680,8 +710,12 @@ def hist_timelifes(fof_catalogues, show = True, label = '', alpha = 1, \
                     break
         plt.hist(lifetimes, 50, label = label, alpha = alpha, color = c, \
                 range = range)
-        plt.xlabel("Time duration of "+object_name+"s (days)")
-        plt.ylabel("Number of " + object_name + 's')
+        plt.xlabel("Time duration of "+object_name+"s (days)", \
+                    fontsize = fontsize)
+        plt.ylabel("Number of " + object_name + 's', \
+                    fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         if show:
             plt.show()
 
@@ -792,31 +826,51 @@ def get_mock_dataframe(x_rand, y_rand, test_rand, save = True, output_file = 'mo
 
 def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalogue, \
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
-                         excluded_plots = []):
+                         excluded_plots = [], fontsize = None, cmap = 'turbo', \
+                         pvmin = -5, pvmax = 0, s = 10):
     if 'id' in show_plots and 'id' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', \
+                    s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', \
+                    s = s)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = id_data[id_data > 0], cmap = 'turbo')
-        plt.colorbar()
-        plt.title("ID of hotspots")
+                    c = id_data[id_data > 0], cmap = cmap, edgecolor = 'tab:red', \
+                    s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "ID of foci", size = fontsize)
+        #plt.title("ID of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'pr' in show_plots and 'pr' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', \
+                    s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', \
+                    s = s)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = pr_data[id_data > 0], cmap = 'turbo')
-        plt.colorbar()
-        plt.title("PR of hotspots")
+                    c = pr_data[id_data > 0], cmap = cmap, edgecolor = 'tab:red', \
+                    s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "PR of foci", size = fontsize)
+        #plt.title("PR of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         p_vals = np.array([fof_catalogue[fof_catalogue['id'] == i]['p'] for i in id_data[id_data > 0]], \
                           dtype = float)
         plt.scatter(x_data[positive][id_data > 0], y_data[positive][id_data > 0], \
-                    c = p_vals, cmap = 'turbo')
-        plt.colorbar()
-        plt.title("P-value of hotspots")
+                    c = np.log10(p_vals), cmap = cmap, edgecolor = 'tab:red', \
+                    vmin = pvmin, vmax = pvmax, s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "Log(p)", size = fontsize)
+        #plt.title("P-value of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-hist' in show_plots and 'p-hist' not in excluded_plots:
@@ -829,9 +883,11 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
                      range = [0,1], label = '>'+str(s)+' cases', color = colors[i], alpha = .75)
         plt.xlim(0,1)
         plt.vlines(.05, 0, np.max(hist)*1.1, color = 'tab:orange')
-        plt.ylabel("Number of hotspots")
-        plt.xlabel("P-value")
-        plt.legend()
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
+        plt.xlabel("P-value", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'ncases-hist' in show_plots and 'ncases-hist' not in excluded_plots:
@@ -843,49 +899,69 @@ def visualise_fof_results(x_data, y_data, positive, pr_data, id_data, fof_catalo
                                               range = [np.min(fof_catalogue['total']), \
                                                        np.max(fof_catalogue['total'])], \
                                               color = 'tab:blue', label = 'p > 0.05')
-        plt.ylabel("Number of hotspots")
-        plt.xlabel("Number of cases in hotspots")
-        plt.legend()
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'falseposfrac' in show_plots and 'falseposfrac' not in excluded_plots:
         mask = np.isfinite(hist_highp/hist_all)
         plt.plot(edges[:-1][mask], 1 - hist_highp[mask]/hist_all[mask], label = 'False positive fraction')
         plt.plot(edges[:-1][mask], 0*edges[:-1][mask] + .05, c = 'tab:grey', label = '10%')
-        plt.xlabel("Number of cases in hotspots")
-        plt.ylabel("False positive fraction")
-        plt.legend()
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.ylabel("False positive fraction", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
 
 def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_data, \
                          show_plots = ['id', 'pr', 'p-value', 'p-hist', 'ncases-hist', 'falseposfrac'], \
-                         excluded_plots = []):
+                         excluded_plots = [], fontsize = None, cmap = 'turbo', \
+                         pvmin = -5, pvmax = 0, s = 10):
     if 'id' in show_plots and 'id' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.CLUSTER'][mask], cmap = 'turbo')
-        plt.colorbar()
-        plt.title("ID of hotspots")
+                    c = points_data['gis.CLUSTER'][mask], cmap = cmap, \
+                    edgecolor = 'tab:red', s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "ID of foci", size = fontsize)
+        #plt.title("ID of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'pr' in show_plots and 'pr' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.CLU_OBS'][mask]/points_data['gis.CLU_POP'][mask], cmap = 'turbo')
-        plt.colorbar()
-        plt.title("PR of hotspots")
+                    c = points_data['gis.CLU_OBS'][mask]/points_data['gis.CLU_POP'][mask], cmap = cmap, \
+                    edgecolor = 'tab:red', s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "PR of foci", size = fontsize)
+        #plt.title("PR of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-value' in show_plots and 'p-value' not in excluded_plots:
-        plt.scatter(x_data, y_data, c = 'tab:grey')
+        plt.scatter(x_data[np.invert(positive)], y_data[np.invert(positive)], c = 'tab:grey', s = s)
+        plt.scatter(x_data[positive], y_data[positive], c = 'tab:grey', edgecolor = 'tab:red', s = s)
         mask = points_data['gis.LOC_OBS'] == 1
         plt.scatter(points_data['gis.LOC_LONG'][mask], points_data['gis.LOC_LAT'][mask], \
-                    c = points_data['gis.P_VALUE'][mask], cmap = 'turbo')
-        plt.colorbar()
-        plt.title("P-value of hotspots")
+                    c = np.log10(points_data['gis.P_VALUE'][mask]), cmap = cmap, \
+                    edgecolor = 'tab:red', vmin = pvmin, vmax = pvmax, s = s)
+        cb = plt.colorbar()
+        cb.set_label(label = "Log(p)", size = fontsize)
+        #plt.title("P-value of hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
         plt.show()
 
     if 'p-hist' in show_plots and 'p-hist' not in excluded_plots:
@@ -898,9 +974,11 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
                      range = [0,1], label = '>'+str(s)+' cases', color = colors[i], alpha = .75)
         plt.xlim(0,1)
         plt.vlines(.05, 0, np.max(hist)*1.1, color = 'tab:orange')
-        plt.ylabel("Number of hotspots")
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
         plt.xlabel("P-value")
-        plt.legend()
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'ncases-hist' in show_plots and 'ncases-hist' not in excluded_plots:
@@ -912,18 +990,22 @@ def visualise_satscan_results(x_data, y_data, positive, points_data, clusters_da
                                               range = [np.min(clusters_data['col.POPULATION']), \
                                                        np.max(clusters_data['col.POPULATION'])], \
                                               color = 'tab:blue', label = 'p > 0.05')
-        plt.ylabel("Number of hotspots")
-        plt.xlabel("Number of cases in hotspots")
-        plt.legend()
+        plt.ylabel("Number of hotspots", fontsize = fontsize)
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
     if 'falseposfrac' in show_plots and 'falseposfrac' not in excluded_plots:
         mask = np.isfinite(hist_highp/hist_all)
         plt.plot(edges[:-1][mask], 1 - hist_highp[mask]/hist_all[mask], label = 'False positive fraction')
         plt.plot(edges[:-1][mask], 0*edges[:-1][mask] + .05, c = 'tab:grey', label = '10%')
-        plt.xlabel("Number of cases in hotspots")
-        plt.ylabel("False positive fraction")
-        plt.legend()
+        plt.xlabel("Number of cases in hotspots", fontsize = fontsize)
+        plt.ylabel("False positive fraction", fontsize = fontsize)
+        plt.xticks(fontsize = fontsize)
+        plt.yticks(fontsize = fontsize)
+        plt.legend(fontsize = fontsize)
         plt.show()
 
 def get_study_year(mipmon):
@@ -939,3 +1021,28 @@ def get_study_year(mipmon):
         elif mipmon['visdate'].iloc[i] >= pd.to_datetime(year_3[0]) and mipmon['visdate'].iloc[i] <= pd.to_datetime(year_3[1]):
             study_year[i] = 3
     return study_year
+
+def get_foci_years(epi_list, mean_dates):
+    all_tempid = utils.get_label_list(epi_list, 'tempID')
+    years = []
+    for tid in all_tempid:
+        times = find_timesteps_with_id(epi_list, tid)
+        dates = pd.DataFrame({'visdate' : pd.Series(mean_dates[times])})
+        year = get_study_year(dates)
+        years.append(int(round(np.mean(year),0)))
+    year_counts = count_foci_per_year(np.array(years))
+    return year_counts
+
+def count_foci_per_year(years):
+    year_counts = {}
+    year_counts['Year 1'] = np.sum(years == 1)
+    year_counts['Year 2'] = np.sum(years == 2)
+    year_counts['Year 3'] = np.sum(years == 3)
+    return year_counts
+
+def find_timesteps_with_id(epi_list, tempid):
+    timesteps = []
+    for i in range(len(epi_list)):
+        if tempid in epi_list[i]['tempID'].unique():
+            timesteps.append(i)
+    return timesteps

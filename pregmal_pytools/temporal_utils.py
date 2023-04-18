@@ -20,7 +20,7 @@ def import_temporal_data(data_path = '~/isglobal/projects/pregmal/data/', \
                         serology_name = 'MiPMON_serostatus_wide.csv', \
                         rrs_name = 'RRS_data_age.csv', \
                         opd_name = 'weekly_OPD_cases_2014_2019_6_posts.csv', \
-                        opd_5_name = 'weekly_OPD_cases_2014_2019_6_posts_age_5.csv', \
+                        opd_5_name = 'weekly_OPD_cases_2016_2019_age_5.csv', \
                         opd_2to9_name = 'weekly_OPD_cases_2014_2019_6_posts_age2to9.csv', \
                         excluded_antigens = ['pAMA1', 'PvLDH', 'P5', 'DBL6e', 'PfHRP2', \
                                              'PfLDH', 'general_pos', 'pregnancy_pos', \
@@ -95,6 +95,7 @@ def import_temporal_data(data_path = '~/isglobal/projects/pregmal/data/', \
         mipmon[cutoff+'general_pos'] = np.array(mipmon[cutoff+'breadth_general'] >= 1, dtype = int)
         mipmon[cutoff+'pregnancy_pos'] = np.array(mipmon[cutoff+'breadth_pregnancy'] >= 1, dtype = int)
         mipmon[cutoff+'All peptides'] = np.array(mipmon[cutoff+'breadth_peptides'] >= 1, dtype = int)
+        mipmon[cutoff+'P1+P8'] = np.array(mipmon[cutoff+'P1'] + mipmon[cutoff+'P8'] >= 1, dtype = int)
     if 'breadth_general' not in excluded_antigens:
         antigens.append('breadth_general')
     if 'breadth_pregnancy' not in excluded_antigens:
@@ -105,6 +106,8 @@ def import_temporal_data(data_path = '~/isglobal/projects/pregmal/data/', \
         antigens.append('pregnancy_pos')
     if 'All peptides' not in excluded_antigens:
         antigens.append('All peptides')
+    if 'P1+P8' not in excluded_antigens:
+        antigens.append('P1+P8')
 
     #Building incidence
     opd_2to9['incidence'] = 0
@@ -858,7 +861,7 @@ def get_clinic_amplitude_chi2(mipmon_prev, mipmon_err, clinic_bins, clinic_err, 
                         clinic_for_ls = clinic_bins
                     else:
                         clinic_for_ls = clinic_bins_r[:,r]
-                mask = (mipmon_prev_r[:,r] > 0)&(clinic_for_ls>0)#TODO change >= to >
+                mask = (mipmon_prev_r[:,r] >= 0)&(clinic_for_ls>=0)#TODO change >= to >
                 k_r, out = optimization.leastsq(residual, 1., args=(mipmon_prev_r[:,r][mask], mipmon_err[mask], clinic_for_ls[mask], clinic_err[mask]))#TODO test
                 pcorr_r.append(sci_stats.pearsonr(mipmon_prev_r[:,r][mask], k_r*clinic_for_ls[mask])[0])#TODO test
             pcorr_r = np.array(pcorr_r)#TODO test

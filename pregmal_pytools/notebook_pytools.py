@@ -120,6 +120,9 @@ def get_mipmon_prev_bins(mipmon, mipmon_areas, test_type, cross_dates, time_widt
     elif test_type == 'pcr':
         mask = mask&mipmon['pcrpos'].notnull()&mipmon_areas_mask
         test_mipmon = mipmon['pcrpos']
+    else:
+        mask = mask&mipmon[test_type].notnull()&mipmon_areas_mask
+        test_mipmon = mipmon[test_type]
     #Define MiPMon time bins
     mipmon_bins = []
     for i in cross_dates:
@@ -149,7 +152,8 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
                            time_width, time_shift, print_sizes = True, \
                            cross_mask = None, mip_mask = None, title = '', \
                            verbose = True, show_fit = True, show_identity = True, show = True, \
-                      xmin = None, xmax = None, colors = None):
+                      xmin = None, xmax = None, colors = None, legend = True, \
+                      fontsize = None, frameon = True, framealpha = 1):
     """
     This method shows the scatter comparison between MiPMon and Cross-sectional
     data and outputs the linear fit parameters and the Pearson CC.
@@ -202,22 +206,24 @@ def scatter_linfit_pcc(cross210, mipmon, mipmon_areas, cross_areas, cross_test_t
         xmax = np.max(all_vals)*1.05
     xplot = np.array([xmin, xmax])
     if show_identity:
-        plt.plot(xplot, xplot, color = 'tab:grey', label = 'Identity')
+        plt.plot(xplot, xplot, color = 'tab:grey', label = 'Identical')
     if show_fit:
         plt.plot(xplot, p_all[1] + p_all[0]*xplot, lw = 2, color = 'k', linestyle = '--', label = 'Linear regression')
     if cross_test_type == 'rdt':
         testlabel = 'RDT'
     elif cross_test_type == 'pcr':
         testlabel = 'qPCR'
-    plt.xlabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ cross-sectional (2-10 years)')
+    plt.xlabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ children', fontsize = fontsize)
     if mip_test_type == 'rdt':
         testlabel = 'RDT'
     elif mip_test_type == 'pcr':
         testlabel = 'qPCR'
-    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ pregnant women')
-    plt.title(title)
+    plt.ylabel(r'$Pf\rm{PR}_{\rm{'+testlabel+'}}$ ' + title, fontsize = fontsize)
     plt.xlim(xmin, xmax)
-    plt.legend()
+    plt.yticks(fontsize = fontsize)
+    plt.xticks(fontsize = fontsize)
+    if legend:
+        plt.legend(fontsize = fontsize, frameon = frameon, framealpha = framealpha)
     if show:
         plt.show()
     return p_all, pcorr_all
