@@ -385,7 +385,11 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
                          output_path = '/tmp/', save = True, bins2d = 50, label2plot = 'lifetime', \
                          kernel_size = 1, max_p_lifetimes = 1, name_end = '', plot_date = 'month', \
                          xlims = None, ylims = None, version = 'fof', object_name = 'hotspot', \
-                         min_date = None, max_date = None, fontsize = None, keep_null_tests = True):
+                         min_date = None, max_date = None, fontsize = None, keep_null_tests = True, \
+                            color_neg = 'tab:grey', color_pos = 'tab:blue', color_foci = 'tab:red'):
+    """
+    DOCUMENTATION PENDING
+    """
     #temporal loop
     if min_date is None:
         min_date = index['date'].min()
@@ -461,19 +465,19 @@ def get_temporal_hotspots(index, time_width, time_steps, scale, min_num, linking
         if save or show_maps:
             ax = df_to_plot.plot(markersize = 0, figsize = [8,8], alpha = 0)
             if np.sum(negatives) > 0:
-                df_to_plot[negatives].plot(ax = ax, color = 'tab:green', markersize = 15, figsize = [8,8], alpha = .5, label = 'Negative case')
+                df_to_plot[negatives].plot(ax = ax, color = color_neg, markersize = 15, figsize = [8,8], alpha = .75, label = 'Negative case')
             if np.sum(positives) == 0:#To keep the legend of cases in hotspots even when there are no cases
                 mockdf = pd.DataFrame({'lng' : [.0], 'lat' : [.0]})
                 mockdf = geopandas.GeoDataFrame(mockdf, geometry = geopandas.points_from_xy(mockdf['lng'], mockdf['lat']))
-                mockdf.plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside ' + object_name)
+                mockdf.plot(ax = ax, color = color_pos, markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside ' + object_name)
             else:
-                df_to_plot[positives].plot(ax = ax, color = 'tab:red', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside ' + object_name)
+                df_to_plot[positives].plot(ax = ax, color = color_pos, markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case outside ' + object_name)
             if np.sum(hotspot > 0) == 0:#To keep the legend of cases in hotspots even when there are no cases
                 mockdf = pd.DataFrame({'lng' : [.0], 'lat' : [.0]})
                 mockdf = geopandas.GeoDataFrame(mockdf, geometry = geopandas.points_from_xy(mockdf['lng'], mockdf['lat']))
-                mockdf.plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
+                mockdf.plot(ax = ax, color = color_foci, markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
             else:
-                df_to_plot[positives][hotspot > 0].plot(ax = ax, color = 'tab:orange', markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
+                df_to_plot[positives][hotspot > 0].plot(ax = ax, color = color_foci, markersize = 15, figsize = [8,8], alpha = 1, label = 'Positive case in ' + object_name)
             ax.set_xlim(xrange[0], xrange[1])
             ax.set_ylim(yrange[0], yrange[1])
             ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs='EPSG:32736')
